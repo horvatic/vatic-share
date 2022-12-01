@@ -8,7 +8,7 @@ import (
 	"github.com/horvatic/vatic-share/sharedConstants"
 )
 
-func BuildPipes() (sessionInPipe *bufio.Reader, fileInPipeName *os.File) {
+func BuildPipes() (sessionOutPipe *bufio.Reader, fileInPipe *os.File) {
 	os.Remove(sharedConstants.FileInPipeName)
 	os.Remove(sharedConstants.SessionInPipeName)
 
