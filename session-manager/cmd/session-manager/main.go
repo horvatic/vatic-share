@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/horvatic/vatic-share/session-manager/pkg/manager"
 )
 
 func main() {
-	fmt.Println("Hello Wolrd")
+	manager.RunSession()
 }
