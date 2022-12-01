@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/horvatic/vatic-share/file-session/pkg/fileSession"
 )
 
 func main() {
-	fmt.Println("Hello Wolrd")
+	fileSession.RunDriver()
 }
