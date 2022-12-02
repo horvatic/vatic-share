@@ -16,6 +16,9 @@ func main() {
 	_ = unix.Mkfifo(sharedConstants.FileInPipeName, 0666)
 	_ = unix.Mkfifo(sharedConstants.SessionInPipeName, 0666)
 
+	webApi := exec.Command("./Share.Web")
+	webApi.Stdout = os.Stdout
+    webApi.Stderr = os.Stderr
 	sessionManager := exec.Command("./session-manager")
 	sessionManager.Stdout = os.Stdout
     sessionManager.Stderr = os.Stderr
@@ -25,8 +28,9 @@ func main() {
 
 	sessionManager.Start()
 	fileSession.Start()
+	webApi.Start()
 
-	sessionManager.Wait()
+	webApi.Wait()
 
 	fmt.Println("Done")
 }
