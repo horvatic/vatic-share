@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 golang:alpine AS go-builder
+FROM golang:alpine AS go-builder
 RUN apk --no-cache add make
 ENV GOOS=linux
 WORKDIR /build
@@ -6,8 +6,8 @@ COPY ./session ./session
 COPY Makefile Makefile
 RUN make build-session
 
-FROM --platform=linux/amd64 ubuntu:latest  AS dotnet-builder
-RUN apt-get update && apt-get install -y make curl dotnet-sdk-6.0
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dotnet-builder
+RUN apk --no-cache add make
 WORKDIR /build
 COPY ./web-interface ./web-interface
 COPY Makefile Makefile
