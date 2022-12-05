@@ -1,21 +1,29 @@
 package fileSession
 
 import (
-	"fmt"
+	"strings"
+
+	"github.com/horvatic/vatic-share/sharedConstants"
 )
 
 func RunDriver() {
-	fmt.Println("Running File Manager...")
 
 	fileOutPipe := BuildFileOutPipe()
 	sessionInPipe := BuildSessionInPipe()
 
-	sessionInPipe.WriteString("Hello From File Session\n")
+	message := ""
 
 	for {
-		line, err := fileOutPipe.ReadBytes('\n')
+		rawLine, err := fileOutPipe.ReadBytes('\n')
+		line := string(rawLine)
 		if err == nil {
-			fmt.Print("Message: " + string(line))
+			if strings.HasPrefix(line, sharedConstants.WriteToFileCommand) {
+				message = strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.WriteToFileCommand), "\n")
+			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand)  {
+				sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + message + "\n")
+			} else {
+				sessionInPipe.WriteString("Unknown command\n")
+			}
 		}
 	}
 }
