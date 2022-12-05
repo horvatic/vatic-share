@@ -6,10 +6,16 @@ import (
 
 func RunDriver() {
 	fmt.Println("Running File Manager...")
-	
-	fileOutPipe, sessionInPipe := BuildPipes()
+
+	fileOutPipe := BuildFileOutPipe()
+	sessionInPipe := BuildSessionInPipe()
 
 	sessionInPipe.WriteString("Hello From File Session\n")
-	line, _ := fileOutPipe.ReadBytes('\n')
-	fmt.Print("Message from Session Manager: " + string(line))
+
+	for {
+		line, err := fileOutPipe.ReadBytes('\n')
+		if err == nil {
+			fmt.Print("Message: " + string(line))
+		}
+	}
 }

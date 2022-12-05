@@ -3,13 +3,24 @@ package fileSession
 import (
 	"bufio"
 	"os"
-	
+
 	"github.com/horvatic/vatic-share/sharedConstants"
 )
 
-func BuildPipes() (fileOutPipe *bufio.Reader, sessionInPipe *os.File) {
-	writeFile, _ := os.OpenFile(sharedConstants.SessionInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
-	readFile, _ := os.OpenFile(sharedConstants.FileInPipeName, os.O_CREATE, os.ModeNamedPipe)
+func BuildFileOutPipe() *bufio.Reader {
+	fileOutPipe, err := os.OpenFile(sharedConstants.FileInPipeName, os.O_CREATE, os.ModeNamedPipe)
+	if err != nil {
+		panic(err)
+	}
 
-	return bufio.NewReader(readFile), writeFile
+	return bufio.NewReader(fileOutPipe)
+}
+
+func BuildSessionInPipe() *os.File {
+	sessionInPipe, err := os.OpenFile(sharedConstants.SessionInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	return sessionInPipe
 }
