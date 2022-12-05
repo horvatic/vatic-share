@@ -18,13 +18,13 @@ func RunSession() {
 		line := string(rawLine)
 		if err == nil {
 			if strings.HasPrefix(line, sharedConstants.DataInCommand) {
-				fileInPipe.WriteString(sharedConstants.WriteToFileCommand + strings.TrimPrefix(line, sharedConstants.DataInCommand))
+				go fileInPipe.WriteString(sharedConstants.WriteToFileCommand + strings.TrimPrefix(line, sharedConstants.DataInCommand))
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
-				fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + "\n")
+				go fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + "\n")
 			} else if strings.HasPrefix(line, sharedConstants.OutputFromFileCommand) {
-				webApiPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputFromFileCommand))
+				go webApiPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputFromFileCommand))
 			} else {
-				webApiPipe.WriteString("Unknown command\n")
+				go webApiPipe.WriteString("Unknown command\n")
 			}
 		}
 	}

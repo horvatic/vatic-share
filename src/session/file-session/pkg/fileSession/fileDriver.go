@@ -20,9 +20,9 @@ func RunDriver() {
 			if strings.HasPrefix(line, sharedConstants.WriteToFileCommand) {
 				message = strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.WriteToFileCommand), "\n")
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand)  {
-				sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + message + "\n")
+				go sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + message + "\n")
 			} else {
-				sessionInPipe.WriteString("Unknown command\n")
+				go sessionInPipe.WriteString("Unknown command\n")
 			}
 		}
 	}
