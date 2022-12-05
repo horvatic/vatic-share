@@ -20,7 +20,8 @@ func RunSession() {
 			if strings.HasPrefix(line, sharedConstants.DataInCommand) {
 				go fileInPipe.WriteString(sharedConstants.WriteToFileCommand + strings.TrimPrefix(line, sharedConstants.DataInCommand))
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
-				go fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + "\n")
+				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
+				go fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + message + "\n")
 			} else if strings.HasPrefix(line, sharedConstants.OutputFromFileCommand) {
 				go webApiPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputFromFileCommand))
 			} else {
