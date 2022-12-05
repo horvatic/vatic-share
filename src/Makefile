@@ -35,3 +35,13 @@ go-fmt:
 	cd session/file-session && go fmt ./...
 	cd session/boot-strap && go fmt ./...
 	cd session/shared-constants && go fmt ./...
+
+.PHONY: run
+.NOTPARALLEL:
+run: clean-session clean-web
+	docker-compose up --build -d
+
+.PHONY: stop
+.NOTPARALLEL:
+stop:
+	docker-compose down
