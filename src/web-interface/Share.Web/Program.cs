@@ -8,9 +8,15 @@ var pipeBuilder = new PipeBuilder();
 using var sessionInPipe = pipeBuilder.BuildSessionInPipe();
 using var apiOutPipe = pipeBuilder.BuildWebApiOutPipe();
 
-app.MapGet("/", async () => {
-    var message = Encoding.ASCII.GetBytes("Hello From Dotnet\n");
-    await sessionInPipe.WriteAsync(message, 0, message.Length);
+app.MapGet("/pushdata", async (string data) => {
+    var encodedData = Encoding.ASCII.GetBytes("datain " + data + "\n");
+    await sessionInPipe.WriteAsync(encodedData, 0, encodedData.Length);
+    return "Data Saved";
+});
+
+app.MapGet("/readdata", async () => {
+    var encodedMessage = Encoding.ASCII.GetBytes("read \n");
+    await sessionInPipe.WriteAsync(encodedMessage, 0, encodedMessage.Length);
     return await apiOutPipe.ReadLineAsync();
 });
 
