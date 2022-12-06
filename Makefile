@@ -22,8 +22,3 @@ run: stop
 .NOTPARALLEL:
 stop:
 	docker-compose down
-
-.PHONY: test
-.NOTPARALLEL:
-test:
-	cd test &&  chmod +x test.sh && ./test.sh
