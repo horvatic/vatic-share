@@ -27,23 +27,23 @@ namespace UserSession {
 
             var request = await _user.GetUserRequest();
             while (_user.IsOpen) {
-                if(request.Array != null) {
-                    await _sessionInPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
-                    await _sessionInPipe.WriteAsync(_sessionId, 0, _sessionId.Length);
-                    await _sessionInPipe.WriteAsync(spaceData, 0, spaceData.Length);
-                    await _sessionInPipe.WriteAsync(request.Array, 0, request.Count);
-                    await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
-
-                    await _sessionInPipe.WriteAsync(readEncoded, 0, readEncoded.Length);
-                    await _sessionInPipe.WriteAsync(_sessionId, 0, _sessionId.Length);
-                    await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
-                    
-                    var result = Encoding.ASCII.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "");
-
-                    await _user.WriteRequest(result, result.Length);
-                } else {
-                    throw new Exception();
+                if(request.Array == null) {
+                    continue ;
                 }
+                await _sessionInPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
+                await _sessionInPipe.WriteAsync(_sessionId, 0, _sessionId.Length);
+                await _sessionInPipe.WriteAsync(spaceData, 0, spaceData.Length);
+                await _sessionInPipe.WriteAsync(request.Array, 0, request.Count);
+                await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
+
+                await _sessionInPipe.WriteAsync(readEncoded, 0, readEncoded.Length);
+                await _sessionInPipe.WriteAsync(_sessionId, 0, _sessionId.Length);
+                await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
+                
+                var result = Encoding.ASCII.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "No Data");
+
+                await _user.WriteRequest(result, result.Length);
+
                 request = await _user.GetUserRequest();
             }
             await _user.Close();
