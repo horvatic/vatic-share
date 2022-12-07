@@ -11,7 +11,7 @@ func RunDriver() {
 	fileOutPipe := BuildFileOutPipe()
 	sessionInPipe := BuildSessionInPipe()
 
-	store := make(map[string]string)
+	fileStore := make(map[string]string)
 
 	for {
 		rawLine, err := fileOutPipe.ReadBytes('\n')
@@ -20,10 +20,10 @@ func RunDriver() {
 			if strings.HasPrefix(line, sharedConstants.WriteToFileCommand) {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.WriteToFileCommand), "\n")
 				sessionMessage := strings.SplitN(message, " ", 2)
-				store[sessionMessage[0]] = sessionMessage[1]
+				fileStore[sessionMessage[0]] = sessionMessage[1]
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand)  {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
-				go sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + store[message] + "\n")
+				go sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + fileStore[message] + "\n")
 			} else {
 				go sessionInPipe.WriteString("Unknown command\n")
 			}
