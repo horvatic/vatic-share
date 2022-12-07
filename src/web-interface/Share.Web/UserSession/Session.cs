@@ -30,7 +30,7 @@ namespace UserSession {
                 if(request.Array != null) {
                     await _sessionInPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
                     await _sessionInPipe.WriteAsync(_sessionId, 0, _sessionId.Length);
-                     await _sessionInPipe.WriteAsync(spaceData, 0, spaceData.Length);
+                    await _sessionInPipe.WriteAsync(spaceData, 0, spaceData.Length);
                     await _sessionInPipe.WriteAsync(request.Array, 0, request.Count);
                     await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
 

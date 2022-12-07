@@ -18,9 +18,6 @@ namespace UserSession {
         public async Task<ArraySegment<byte>> GetUserRequest() {
             var receiveResult = await _socket.ReceiveAsync(new ArraySegment<byte>(_buffer), CancellationToken.None);
             IsOpen = !receiveResult.CloseStatus.HasValue;
-            if(!IsOpen) {
-
-            }
             return new ArraySegment<byte>(_buffer, 0, receiveResult.Count);
         }
 
