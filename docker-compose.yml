@@ -1,6 +1,10 @@
 version: "3.8"
 services:
   share-session:
-    build: ./src
+    build: ./src/shared-session
     ports:
       - "8080:8080"
+  ui:
+    build: ./src/front-end/
+    ports:
+      - "80:80"
