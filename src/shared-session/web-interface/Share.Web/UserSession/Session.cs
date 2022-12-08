@@ -16,14 +16,14 @@ namespace UserSession {
             _user = user;
             _sessionInPipe = sessionInPipe;
             _apiOutPipe = apiOutPipe;
-            _sessionId = Encoding.ASCII.GetBytes(sessionId);
+            _sessionId = Encoding.UTF8.GetBytes(sessionId);
         }
 
         public async Task Run() {
-            var dataInEncoded = Encoding.ASCII.GetBytes(DATA_IN);
-            var endMessage = Encoding.ASCII.GetBytes("\n");
-            var spaceData = Encoding.ASCII.GetBytes(" ");
-            var readEncoded = Encoding.ASCII.GetBytes(READ);
+            var dataInEncoded = Encoding.UTF8.GetBytes(DATA_IN);
+            var endMessage = Encoding.UTF8.GetBytes("\n");
+            var spaceData = Encoding.UTF8.GetBytes(" ");
+            var readEncoded = Encoding.UTF8.GetBytes(READ);
 
             var request = await _user.GetUserRequest();
             while (_user.IsOpen) {
@@ -40,7 +40,7 @@ namespace UserSession {
                 await _sessionInPipe.WriteAsync(_sessionId, 0, _sessionId.Length);
                 await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
                 
-                var result = Encoding.ASCII.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "No Data");
+                var result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "No Data");
 
                 await _user.WriteRequest(result, result.Length);
 

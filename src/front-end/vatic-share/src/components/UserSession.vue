@@ -11,7 +11,7 @@ export default {
   mounted() { 
     this.connection = new WebSocket("ws://127.0.0.1:8080")
     this.connection.onmessage = (event) => {
-      this.responseMessage = event.data + '|';
+      this.responseMessage = this.responseMessage.slice(0, -1) + event.data + '|';
     }
     this.connection.onopen = (event) => {
       console.log(event)
@@ -22,13 +22,15 @@ export default {
   data: () => {
     return {
       connection: null,
-      responseMessage: 'no data',
+      responseMessage: '',
     }
   },
   methods: {
     onPress(e) {
       if(e.key == 'Enter') {
         this.connection.send('\n');
+      } else if(e.key == 'Shift') {
+        return
       } else {
         this.connection.send(e.key);
       }
