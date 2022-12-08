@@ -22,10 +22,10 @@ func RunDriver() {
 				sessionMessage := strings.SplitN(message, " ", 2)
 				decode, _ := b64.StdEncoding.DecodeString(sessionMessage[1])
 				fileStore[sessionMessage[0]] = fileStore[sessionMessage[0]] + string(decode)
+				go sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + sessionMessage[1] + "\n")
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand)  {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
-				file := fileStore[message]
-				encode := b64.StdEncoding.EncodeToString([]byte(file[len(file)-1:]))
+				encode := b64.StdEncoding.EncodeToString([]byte(fileStore[message]))
 				go sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + encode + "\n")
 			} else {
 				go sessionInPipe.WriteString("Unknown command\n")
