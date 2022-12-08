@@ -25,7 +25,6 @@ namespace UserSession {
                 throw new Exception();
             }
 
-
             var base64 = System.Convert.ToBase64String(rawData);
             return new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
         }

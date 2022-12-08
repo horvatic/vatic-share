@@ -25,6 +25,14 @@ namespace UserSession {
             var spaceData = Encoding.UTF8.GetBytes(" ");
             var readEncoded = Encoding.UTF8.GetBytes(READ);
 
+            await _sessionInPipe.WriteAsync(readEncoded, 0, readEncoded.Length);
+            await _sessionInPipe.WriteAsync(_sessionId, 0, _sessionId.Length);
+            await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
+
+            var result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "");
+
+            await _user.WriteRequest(result, result.Length);
+
             var request = await _user.GetUserRequest();
             while (_user.IsOpen) {
                 if(request.Array == null) {
@@ -36,7 +44,7 @@ namespace UserSession {
                 await _sessionInPipe.WriteAsync(request.Array, 0, request.Count);
                 await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
                 
-                var result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "No Data");
+                result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "No Data");
 
                 await _user.WriteRequest(result, result.Length);
 
