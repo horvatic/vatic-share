@@ -19,7 +19,7 @@ app.Use(async (HttpContext context, Func<Task> next) =>
     if (context.WebSockets.IsWebSocketRequest)
     {
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        var session = new Session(new User(webSocket, 1024 * 4), sessionInPipe, apiOutPipe, Guid.NewGuid().ToString());
+        var session = new Session(new User(webSocket, 1024 * 4), sessionInPipe, apiOutPipe, "1");
         await session.Run();
     }
     else

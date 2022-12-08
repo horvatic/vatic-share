@@ -21,7 +21,12 @@ func RunDriver() {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.WriteToFileCommand), "\n")
 				sessionMessage := strings.SplitN(message, " ", 2)
 				decode, _ := b64.StdEncoding.DecodeString(sessionMessage[1])
-				fileStore[sessionMessage[0]] = fileStore[sessionMessage[0]] + string(decode)
+				if sessionMessage[1] == "\b" {
+					currentSessionMessage := fileStore[sessionMessage[0]]
+					fileStore[sessionMessage[0]] = currentSessionMessage[:len(currentSessionMessage)-1]
+				} else {
+					fileStore[sessionMessage[0]] = fileStore[sessionMessage[0]] + string(decode)
+				}
 				go sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + sessionMessage[1] + "\n")
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand)  {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")

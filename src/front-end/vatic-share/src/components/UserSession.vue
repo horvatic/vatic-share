@@ -11,7 +11,11 @@ export default {
   mounted() { 
     this.connection = new WebSocket("ws://127.0.0.1:8080")
     this.connection.onmessage = (event) => {
-      this.responseMessage = this.responseMessage.slice(0, -1) + event.data + '|';
+      if(event.data == '\b') {
+        this.responseMessage = this.responseMessage.slice(0, -2) + '|'
+      } else {
+        this.responseMessage = this.responseMessage.slice(0, -1) + event.data + '|';
+      }
     }
     this.connection.onopen = (event) => {
       console.log(event)
@@ -28,9 +32,11 @@ export default {
   methods: {
     onPress(e) {
       if(e.key == 'Enter') {
-        this.connection.send('\n');
+        this.connection.send('\n')
+      } else if(e.key == 'Backspace') {
+        this.connection.send('\b')
       } else if(e.key == 'Shift') {
-        return
+          return
       } else {
         this.connection.send(e.key);
       }
