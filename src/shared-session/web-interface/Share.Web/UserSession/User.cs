@@ -8,7 +8,7 @@ namespace UserSession {
         private readonly WebSocket _socket;
         private readonly byte[] _buffer;
 
-        public bool IsOpen {get; private set; }
+        public bool IsOpen { get; private set; }
 
         public User(WebSocket socket, int bufferSize) {
             _socket = socket;

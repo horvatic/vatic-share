@@ -33,8 +33,8 @@ namespace UserSession {
 
             await _user.WriteRequest(result, result.Length);
 
-            var request = await _user.GetUserRequest();
             while (_user.IsOpen) {
+                var request = await _user.GetUserRequest();
                 if(request.Array == null) {
                     continue ;
                 }
@@ -44,11 +44,9 @@ namespace UserSession {
                 await _sessionInPipe.WriteAsync(request.Array, 0, request.Count);
                 await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
                 
-                result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "No Data");
+                result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "");
 
                 await _user.WriteRequest(result, result.Length);
-
-                request = await _user.GetUserRequest();
             }
             await _user.Close();
         }
