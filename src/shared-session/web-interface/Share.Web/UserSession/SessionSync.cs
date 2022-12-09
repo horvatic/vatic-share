@@ -1,7 +1,7 @@
 using System.Text;
 
 namespace UserSession {
-        public class SessionSync {
+    public class SessionSync {
         private readonly List<UserSessionModel> _userSessions;
         private readonly FileStream _sessionInBlockDataPipe;
         private readonly StreamReader _apiOutKeyDataPipe;
