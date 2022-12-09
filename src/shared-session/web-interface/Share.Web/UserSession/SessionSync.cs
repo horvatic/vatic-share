@@ -43,9 +43,13 @@ namespace UserSession {
                 if(userSession.User.IsOpen) {
                     await userSession.User.WriteRequest(result, result.Length);
                 }
-                else {
-                    _userSessions.Remove(userSession);
-                }
+            }
+        }
+
+        public void RemoveClosedUserSession() {
+            var closedSessions = _userSessions.Where(x => !x.User.IsOpen).ToList();
+            foreach(var closedSession in closedSessions) {
+                _userSessions.Remove(closedSession);
             }
         }
     }

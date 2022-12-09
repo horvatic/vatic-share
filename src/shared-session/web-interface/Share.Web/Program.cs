@@ -14,6 +14,7 @@ var sessionSync = new SessionSync(sessionBlockDataInPipe, apiKeyDataOutPipe, api
 var sessionSyncThread = new Thread(async() => {
     while(!cancellationTokenSource.Token.IsCancellationRequested) {
         await sessionSync.PushSessionData(cancellationTokenSource.Token);
+        sessionSync.RemoveClosedUserSession();
     }
 });
 sessionSyncThread.Start();
