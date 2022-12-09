@@ -11,11 +11,13 @@ import (
 func main() {
 
 	os.Remove(sharedConstants.FileInPipeName)
-	os.Remove(sharedConstants.SessionInPipeName)
+	os.Remove(sharedConstants.SessionInPipeNameForFileRead)
+	os.Remove(sharedConstants.SessionInPipeNameForWebApi)
 	os.Remove(sharedConstants.WebApiInPipeName)
 
 	_ = unix.Mkfifo(sharedConstants.FileInPipeName, 0666)
-	_ = unix.Mkfifo(sharedConstants.SessionInPipeName, 0666)
+	_ = unix.Mkfifo(sharedConstants.SessionInPipeNameForFileRead, 0666)
+	_ = unix.Mkfifo(sharedConstants.SessionInPipeNameForWebApi, 0666)
 	_ = unix.Mkfifo(sharedConstants.WebApiInPipeName, 0666)
 
 	webApi := exec.Command("./Share.Web")

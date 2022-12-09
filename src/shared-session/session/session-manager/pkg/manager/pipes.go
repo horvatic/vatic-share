@@ -7,8 +7,17 @@ import (
 	"github.com/horvatic/vatic-share/sharedConstants"
 )
 
-func BuildSessionOutPipe() *bufio.Reader {
-	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionInPipeName, os.O_CREATE, os.ModeNamedPipe)
+func BuildSessionOutFromFileReadPipe() *bufio.Reader {
+	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionInPipeNameForFileRead, os.O_CREATE, os.ModeNamedPipe)
+	if err != nil {
+		panic(err)
+	}
+
+	return bufio.NewReader(sessionOutPipe)
+}
+
+func BuildSessionOutFromWebApiPipe() *bufio.Reader {
+	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionInPipeNameForWebApi, os.O_CREATE, os.ModeNamedPipe)
 	if err != nil {
 		panic(err)
 	}

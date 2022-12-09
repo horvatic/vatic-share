@@ -33,6 +33,11 @@ namespace UserSession {
 
             await _user.WriteRequest(result, result.Length);
 
+            var pullSessionData = new Thread(async() => {
+                await PullSessionData();
+            });
+            pullSessionData.Start();
+
             while (_user.IsOpen) {
                 var request = await _user.GetUserRequest();
                 if(request.Array == null) {
@@ -43,12 +48,16 @@ namespace UserSession {
                 await _sessionInPipe.WriteAsync(spaceData, 0, spaceData.Length);
                 await _sessionInPipe.WriteAsync(request.Array, 0, request.Count);
                 await _sessionInPipe.WriteAsync(endMessage, 0, endMessage.Length);
-                
-                result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "");
+            }
+            pullSessionData.Join();
+            await _user.Close();
+        }
 
+        private async Task PullSessionData() {
+            while (_user.IsOpen) {
+                var result = Encoding.UTF8.GetBytes(await _apiOutPipe.ReadLineAsync() ?? "");
                 await _user.WriteRequest(result, result.Length);
             }
-            await _user.Close();
         }
     }
 }

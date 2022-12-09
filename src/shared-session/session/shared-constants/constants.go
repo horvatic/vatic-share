@@ -2,7 +2,8 @@ package sharedConstants
 
 // Pipes
 const FileInPipeName = "/tmp/fileInPipe"
-const SessionInPipeName = "/tmp/sessionInPipe"
+const SessionInPipeNameForFileRead = "/tmp/sessionInPipeForFileRead"
+const SessionInPipeNameForWebApi = "/tmp/sessionInPipeForWebApi"
 const WebApiInPipeName = "/tmp/webApiInPipe"
 
 // Commands

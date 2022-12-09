@@ -17,7 +17,7 @@ func BuildFileOutPipe() *bufio.Reader {
 }
 
 func BuildSessionInPipe() *os.File {
-	sessionInPipe, err := os.OpenFile(sharedConstants.SessionInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	sessionInPipe, err := os.OpenFile(sharedConstants.SessionInPipeNameForFileRead, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
 		panic(err)
 	}
