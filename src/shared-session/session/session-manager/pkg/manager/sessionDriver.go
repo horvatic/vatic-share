@@ -7,25 +7,62 @@ import (
 )
 
 func RunSession() {
+	go runDataFileSession()
+	go runKeyDataSession()
+	runBlockDataSession()
+}
 
-	sessionOutPipe := BuildSessionOutPipe()
+func runBlockDataSession() {
+	sessionBlockDataOutFromWebApiPipe := BuildSessionBlockDataOutFromWebApiPipe()
 	fileInPipe := BuildFileInPipe()
-	webApiPipe := BuildWebApiInPipe()
-
 
 	for {
-		rawLine, err := sessionOutPipe.ReadBytes('\n')
-		line := string(rawLine)
+		rawLine, err := sessionBlockDataOutFromWebApiPipe.ReadBytes('\n')
 		if err == nil {
+			line := string(rawLine)
 			if strings.HasPrefix(line, sharedConstants.DataInCommand) {
-				go fileInPipe.WriteString(sharedConstants.WriteToFileCommand + strings.TrimPrefix(line, sharedConstants.DataInCommand))
+				fileInPipe.WriteString(sharedConstants.WriteToFileCommand + strings.TrimPrefix(line, sharedConstants.DataInCommand))
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
-				go fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + message + "\n")
-			} else if strings.HasPrefix(line, sharedConstants.OutputFromFileCommand) {
-				go webApiPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputFromFileCommand))
+				fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + message + "\n")
+			}
+		}
+	}
+}
+
+func runKeyDataSession() {
+	sessionKeyDataOutFromWebApiPipe := BuildSessionKeyDataOutFromWebApiPipe()
+	fileInPipe := BuildFileInPipe()
+
+	for {
+		rawLine, err := sessionKeyDataOutFromWebApiPipe.ReadBytes('\n')
+		if err == nil {
+			line := string(rawLine)
+			if strings.HasPrefix(line, sharedConstants.DataInCommand) {
+				fileInPipe.WriteString(sharedConstants.WriteToFileCommand + strings.TrimPrefix(line, sharedConstants.DataInCommand))
+			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
+				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
+				fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + message + "\n")
+			}
+		}
+	}
+}
+
+func runDataFileSession() {
+	webApiBlockDataPipe := BuildWebApiBlockDataInPipe()
+	webApiKeyDataPipe := BuildWebApiKeyDataInPipe()
+	sessionOutFromFileReadPipe := BuildSessionOutFromFileReadPipe()
+
+	for {
+		rawLine, err := sessionOutFromFileReadPipe.ReadBytes('\n')
+		if err == nil {
+			line := string(rawLine)
+			if strings.HasPrefix(line, sharedConstants.OutputBlockDataFromFileCommand) {
+				webApiBlockDataPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputBlockDataFromFileCommand))
+			} else if strings.HasPrefix(line, sharedConstants.OutputKeyDataFromFileCommand) {
+				webApiKeyDataPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputKeyDataFromFileCommand))
 			} else {
-				go webApiPipe.WriteString("Unknown command\n")
+				webApiBlockDataPipe.WriteString("Unknown command\n")
 			}
 		}
 	}

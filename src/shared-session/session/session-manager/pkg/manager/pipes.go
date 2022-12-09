@@ -7,8 +7,8 @@ import (
 	"github.com/horvatic/vatic-share/sharedConstants"
 )
 
-func BuildSessionOutPipe() *bufio.Reader {
-	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionInPipeName, os.O_CREATE, os.ModeNamedPipe)
+func BuildSessionOutFromFileReadPipe() *bufio.Reader {
+	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionInPipeNameForFileRead, os.O_CREATE, os.ModeNamedPipe)
 	if err != nil {
 		panic(err)
 	}
@@ -25,8 +25,35 @@ func BuildFileInPipe() *os.File {
 	return fileInPipe
 }
 
-func BuildWebApiInPipe() *os.File {
-	webApiInPipe, err := os.OpenFile(sharedConstants.WebApiInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+func BuildSessionKeyDataOutFromWebApiPipe() *bufio.Reader {
+	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionKeyDataInPipeNameForWebApi, os.O_CREATE, os.ModeNamedPipe)
+	if err != nil {
+		panic(err)
+	}
+
+	return bufio.NewReader(sessionOutPipe)
+}
+
+func BuildWebApiKeyDataInPipe() *os.File {
+	webApiInPipe, err := os.OpenFile(sharedConstants.WebApiKeyDataInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	return webApiInPipe
+}
+
+func BuildSessionBlockDataOutFromWebApiPipe() *bufio.Reader {
+	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionBlockDataInPipeNameForWebApi, os.O_CREATE, os.ModeNamedPipe)
+	if err != nil {
+		panic(err)
+	}
+
+	return bufio.NewReader(sessionOutPipe)
+}
+
+func BuildWebApiBlockDataInPipe() *os.File {
+	webApiInPipe, err := os.OpenFile(sharedConstants.WebApiBlockDataInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
 		panic(err)
 	}

@@ -1,12 +1,18 @@
 package sharedConstants
 
-// Pipes
+// Pipes File Process
 const FileInPipeName = "/tmp/fileInPipe"
-const SessionInPipeName = "/tmp/sessionInPipe"
-const WebApiInPipeName = "/tmp/webApiInPipe"
+const SessionInPipeNameForFileRead = "/tmp/sessionInPipeForFileRead"
+
+// Pipe WebApi Process
+const SessionKeyDataInPipeNameForWebApi = "/tmp/sessionInPipeForWebApiKeyData"
+const WebApiKeyDataInPipeName = "/tmp/webApiInPipeKeyData"
+const SessionBlockDataInPipeNameForWebApi = "/tmp/sessionInPipeForWebApiBlockData"
+const WebApiBlockDataInPipeName = "/tmp/webApiInPipeBlockData"
 
 // Commands
 const DataInCommand = "datain "
 const WriteToFileCommand = "writefile "
 const ReadFromFileCommand = "read "
-const OutputFromFileCommand = "output "
+const OutputBlockDataFromFileCommand = "blockoutput "
+const OutputKeyDataFromFileCommand = "keyoutput "
