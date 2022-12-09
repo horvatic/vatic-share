@@ -6,11 +6,13 @@ var app = builder.Build();
 
 var pipeBuilder = new PipeBuilder();
 var cancellationTokenSource = new CancellationTokenSource();
-using var sessionInPipe = pipeBuilder.BuildSessionInPipe();
-using var apiOutPipe = pipeBuilder.BuildWebApiOutPipe();
-var sessionSync = new SessionSync(apiOutPipe);
+using var sessionBlockDataInPipe = pipeBuilder.BuildSessionBlockDataInPipe();
+using var apiBlockDataOutPipe = pipeBuilder.BuildWebApiBlockDataOutPipe();
+using var sessionKeyDataInPipe = pipeBuilder.BuildSessionKeyDataInPipe();
+using var apiKeyDataOutPipe = pipeBuilder.BuildWebApiKeyDataOutPipe();
+var sessionSync = new SessionSync(sessionBlockDataInPipe, apiKeyDataOutPipe, apiBlockDataOutPipe);
 var sessionSyncThread = new Thread(async() => {
-    while(true) {
+    while(!cancellationTokenSource.Token.IsCancellationRequested) {
         await sessionSync.PushSessionData(cancellationTokenSource.Token);
     }
 });
@@ -27,9 +29,9 @@ app.Use(async (HttpContext context, Func<Task> next) =>
     if (context.WebSockets.IsWebSocketRequest)
     {
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        var user = new User(webSocket, 1024 * 4);
-        var session = new Session(user, sessionInPipe, apiOutPipe, "1");
-        sessionSync.AddUser(user);
+        var userSession = new UserSessionModel(new User(webSocket, 1024 * 4), Guid.NewGuid().ToString());
+        var session = new Session(userSession, sessionKeyDataInPipe);
+        await sessionSync.SyncUserSession(userSession);
         await session.Run();
     }
     else

@@ -1,9 +1,9 @@
 package fileSession
 
 import (
-	"strings"
 	b64 "encoding/base64"
 	"github.com/horvatic/vatic-share/sharedConstants"
+	"strings"
 )
 
 func RunDriver() {
@@ -27,11 +27,11 @@ func RunDriver() {
 				} else {
 					fileStore[sessionMessage[0]] = fileStore[sessionMessage[0]] + string(decode)
 				}
-				sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + sessionMessage[1] + "\n")
-			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand)  {
-				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
-				encode := b64.StdEncoding.EncodeToString([]byte(fileStore[message]))
-				sessionInPipe.WriteString(sharedConstants.OutputFromFileCommand + encode + "\n")
+				sessionInPipe.WriteString(sharedConstants.OutputKeyDataFromFileCommand + sessionMessage[1] + "\n")
+			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
+				filename := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
+				encode := b64.StdEncoding.EncodeToString([]byte(fileStore[filename]))
+				sessionInPipe.WriteString(sharedConstants.OutputBlockDataFromFileCommand + encode + "\n")
 			} else {
 				sessionInPipe.WriteString("Unknown command\n")
 			}

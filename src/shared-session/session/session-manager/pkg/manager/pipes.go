@@ -16,15 +16,6 @@ func BuildSessionOutFromFileReadPipe() *bufio.Reader {
 	return bufio.NewReader(sessionOutPipe)
 }
 
-func BuildSessionOutFromWebApiPipe() *bufio.Reader {
-	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionInPipeNameForWebApi, os.O_CREATE, os.ModeNamedPipe)
-	if err != nil {
-		panic(err)
-	}
-
-	return bufio.NewReader(sessionOutPipe)
-}
-
 func BuildFileInPipe() *os.File {
 	fileInPipe, err := os.OpenFile(sharedConstants.FileInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
@@ -34,8 +25,35 @@ func BuildFileInPipe() *os.File {
 	return fileInPipe
 }
 
-func BuildWebApiInPipe() *os.File {
-	webApiInPipe, err := os.OpenFile(sharedConstants.WebApiInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+func BuildSessionKeyDataOutFromWebApiPipe() *bufio.Reader {
+	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionKeyDataInPipeNameForWebApi, os.O_CREATE, os.ModeNamedPipe)
+	if err != nil {
+		panic(err)
+	}
+
+	return bufio.NewReader(sessionOutPipe)
+}
+
+func BuildWebApiKeyDataInPipe() *os.File {
+	webApiInPipe, err := os.OpenFile(sharedConstants.WebApiKeyDataInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	return webApiInPipe
+}
+
+func BuildSessionBlockDataOutFromWebApiPipe() *bufio.Reader {
+	sessionOutPipe, err := os.OpenFile(sharedConstants.SessionBlockDataInPipeNameForWebApi, os.O_CREATE, os.ModeNamedPipe)
+	if err != nil {
+		panic(err)
+	}
+
+	return bufio.NewReader(sessionOutPipe)
+}
+
+func BuildWebApiBlockDataInPipe() *os.File {
+	webApiInPipe, err := os.OpenFile(sharedConstants.WebApiBlockDataInPipeName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
 		panic(err)
 	}

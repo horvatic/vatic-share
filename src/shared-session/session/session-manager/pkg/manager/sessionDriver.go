@@ -7,15 +7,17 @@ import (
 )
 
 func RunSession() {
+	go runDataFileSession()
+	go runKeyDataSession()
+	runBlockDataSession()
+}
 
-	sessionOutFromWebApiPipe := BuildSessionOutFromWebApiPipe()
+func runBlockDataSession() {
+	sessionBlockDataOutFromWebApiPipe := BuildSessionBlockDataOutFromWebApiPipe()
 	fileInPipe := BuildFileInPipe()
 
-
-	go runFileSession()
-
 	for {
-		rawLine, err := sessionOutFromWebApiPipe.ReadBytes('\n')
+		rawLine, err := sessionBlockDataOutFromWebApiPipe.ReadBytes('\n')
 		if err == nil {
 			line := string(rawLine)
 			if strings.HasPrefix(line, sharedConstants.DataInCommand) {
@@ -23,23 +25,44 @@ func RunSession() {
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
 				fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + message + "\n")
-			} 
+			}
 		}
 	}
 }
 
-func runFileSession() {
-	webApiPipe := BuildWebApiInPipe()
+func runKeyDataSession() {
+	sessionKeyDataOutFromWebApiPipe := BuildSessionKeyDataOutFromWebApiPipe()
+	fileInPipe := BuildFileInPipe()
+
+	for {
+		rawLine, err := sessionKeyDataOutFromWebApiPipe.ReadBytes('\n')
+		if err == nil {
+			line := string(rawLine)
+			if strings.HasPrefix(line, sharedConstants.DataInCommand) {
+				fileInPipe.WriteString(sharedConstants.WriteToFileCommand + strings.TrimPrefix(line, sharedConstants.DataInCommand))
+			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
+				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
+				fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + message + "\n")
+			}
+		}
+	}
+}
+
+func runDataFileSession() {
+	webApiBlockDataPipe := BuildWebApiBlockDataInPipe()
+	webApiKeyDataPipe := BuildWebApiKeyDataInPipe()
 	sessionOutFromFileReadPipe := BuildSessionOutFromFileReadPipe()
 
 	for {
 		rawLine, err := sessionOutFromFileReadPipe.ReadBytes('\n')
 		if err == nil {
 			line := string(rawLine)
-			if strings.HasPrefix(line, sharedConstants.OutputFromFileCommand) {
-				webApiPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputFromFileCommand))
+			if strings.HasPrefix(line, sharedConstants.OutputBlockDataFromFileCommand) {
+				webApiBlockDataPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputBlockDataFromFileCommand))
+			} else if strings.HasPrefix(line, sharedConstants.OutputKeyDataFromFileCommand) {
+				webApiKeyDataPipe.WriteString(strings.TrimPrefix(line, sharedConstants.OutputKeyDataFromFileCommand))
 			} else {
-				webApiPipe.WriteString("Unknown command\n")
+				webApiBlockDataPipe.WriteString("Unknown command\n")
 			}
 		}
 	}
