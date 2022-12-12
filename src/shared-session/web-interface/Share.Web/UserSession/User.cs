@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using System.Text;
+using System;
 
 namespace UserSession {
 
@@ -16,7 +17,7 @@ namespace UserSession {
             IsOpen = true;
         }
 
-        public async Task<ArraySegment<byte>> GetUserRequest() {
+        public async Task<(string, ArraySegment<byte>)> GetUserRequest() {
             var receiveResult = await _socket.ReceiveAsync(new ArraySegment<byte>(_buffer), CancellationToken.None);
             IsOpen = !receiveResult.CloseStatus.HasValue;
 
@@ -25,12 +26,13 @@ namespace UserSession {
                 throw new Exception();
             }
 
-            var base64 = System.Convert.ToBase64String(rawData);
-            return new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
+            var splitPackage = Encoding.UTF8.GetString(rawData).Split(" ", 2);
+            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(splitPackage[1]));
+            return (splitPackage[0], new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length));
         }
 
         public async Task WriteRequest(byte[] buffer, int size) {
-            var base64 = System.Convert.FromBase64String(Encoding.UTF8.GetString(buffer));
+            var base64 = Convert.FromBase64String(Encoding.UTF8.GetString(buffer));
             await _socket.SendAsync(new ArraySegment<byte>(base64, 0, base64.Length), WebSocketMessageType.Text, true, CancellationToken.None);
         }
 

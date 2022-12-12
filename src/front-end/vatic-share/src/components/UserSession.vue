@@ -32,13 +32,13 @@ export default {
   methods: {
     onPress(e) {
       if(e.key == 'Enter') {
-        this.connection.send('\n')
+        this.connection.send("filekey " +'\n')
       } else if(e.key == 'Backspace') {
-        this.connection.send('\b')
+        this.connection.send("filekey " +'\b')
       } else if(e.key == 'Shift') {
           return
       } else {
-        this.connection.send(e.key);
+        this.connection.send("filekey " + e.key);
       }
     }
   }
