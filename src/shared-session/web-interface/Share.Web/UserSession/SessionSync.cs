@@ -1,4 +1,5 @@
 using System.Text;
+using MessageBus;
 
 namespace UserSession {
     public class SessionSync {
@@ -7,15 +8,21 @@ namespace UserSession {
         private readonly StreamReader _apiOutKeyDataPipe;
         private readonly StreamReader _apiOutBlockDataPipe;
 
+        private readonly Message _message;
+
         private const string DATA_IN = "datain ";
 
         private const string READ = "read ";
+        private const string FILE_DATA_OUT = "filedata ";
 
-        public SessionSync(FileStream sessionInBlockDataPipe, StreamReader apiOutKeyDataPipe, StreamReader apiOutBlockDataPipe) {
+        private const string MESSAGE_OUT = "message ";
+
+        public SessionSync(FileStream sessionInBlockDataPipe, StreamReader apiOutKeyDataPipe, StreamReader apiOutBlockDataPipe, Message message) {
             _userSessions = new List<UserSessionModel>();
             _apiOutKeyDataPipe = apiOutKeyDataPipe;
             _apiOutBlockDataPipe = apiOutBlockDataPipe;
             _sessionInBlockDataPipe = sessionInBlockDataPipe;
+            _message = message;
         }
 
         public async Task SyncUserSession(UserSessionModel userSession) {
@@ -29,19 +36,41 @@ namespace UserSession {
             await _sessionInBlockDataPipe.WriteAsync(fileName, 0, fileName.Length);
             await _sessionInBlockDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
 
-            var result = Encoding.UTF8.GetBytes(await _apiOutBlockDataPipe.ReadLineAsync() ?? "");
+            var rawFilePackage = await _apiOutBlockDataPipe.ReadLineAsync() ?? "";
+            var filePackage = "";
+            if(rawFilePackage != "") {
+                filePackage = Encoding.UTF8.GetString(Convert.FromBase64String(rawFilePackage));
+            }
 
-            await userSession.User.WriteRequest(result, result.Length);
+            await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
 
             _userSessions.Add(userSession);
         }
 
-        public async Task PushSessionData(CancellationToken cancellationToken) {
+        public async Task PushFileSessionData(CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = Encoding.UTF8.GetBytes(await _apiOutKeyDataPipe.ReadLineAsync() ?? "");
+            var rawFilePackage = await _apiOutKeyDataPipe.ReadLineAsync() ?? "";
+            var filePackage = "";
+            if(rawFilePackage != "") {
+                filePackage = Encoding.UTF8.GetString(Convert.FromBase64String(rawFilePackage));
+            }
             foreach(var userSession in _userSessions) {
                 if(userSession.User.IsOpen) {
-                    await userSession.User.WriteRequest(result, result.Length);
+                    await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
+                }
+            }
+        }
+
+        public async Task PushMessageSessionData(CancellationToken cancellationToken) {
+            var messages = new List<string>();
+            while(_message.HasMessage()) {
+                messages.Add(_message.Fetch());
+            }
+            foreach(var userSession in _userSessions) {
+                if(userSession.User.IsOpen) {
+                    foreach(var message in messages) {
+                        await userSession.User.WriteRequest(message, MESSAGE_OUT);
+                    }
                 }
             }
         }
