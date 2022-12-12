@@ -21,5 +21,9 @@ namespace MessageBus
         public void Push(string message) {
             _messages.Enqueue(message);
         }
+
+        public bool HasMessage() {
+            return _messages.TryPeek(out _);
+        }
     }
 }

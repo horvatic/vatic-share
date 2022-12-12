@@ -12,6 +12,8 @@ namespace UserSession {
         private const string DATA_IN = "datain ";
 
         private const string FILE_KEY_IN = "filekey";
+
+        private const string MESSAGE_IN = "message";
         public Session(UserSessionModel userSession, FileStream sessionInKeyDataPipe, Message message) {
             _userSession = userSession;
             _sessionInKeyDataPipe = sessionInKeyDataPipe;
@@ -28,15 +30,20 @@ namespace UserSession {
 
             while (_userSession.User.IsOpen) {
                 var (command, request) = await _userSession.User.GetUserRequest();
-                if(request.Array == null) {
-                    continue ;
-                }
                 if(command == FILE_KEY_IN) {
+                    var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
+                    var requestPackage = new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
+                    if(requestPackage.Array == null) {
+                        continue ;
+                    }
                     await _sessionInKeyDataPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
                     await _sessionInKeyDataPipe.WriteAsync(fileName, 0, fileName.Length);
                     await _sessionInKeyDataPipe.WriteAsync(spaceData, 0, spaceData.Length);
-                    await _sessionInKeyDataPipe.WriteAsync(request.Array, 0, request.Count);
+                    await _sessionInKeyDataPipe.WriteAsync(requestPackage.Array, 0, requestPackage.Count);
                     await _sessionInKeyDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
+                }
+                else if(command == MESSAGE_IN) {
+                    _message.Push(request);
                 }
             }
             await _userSession.User.Close();

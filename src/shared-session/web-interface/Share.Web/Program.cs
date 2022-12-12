@@ -12,7 +12,7 @@ using var sessionBlockDataInPipe = pipeBuilder.BuildSessionBlockDataInPipe();
 using var apiBlockDataOutPipe = pipeBuilder.BuildWebApiBlockDataOutPipe();
 using var sessionKeyDataInPipe = pipeBuilder.BuildSessionKeyDataInPipe();
 using var apiKeyDataOutPipe = pipeBuilder.BuildWebApiKeyDataOutPipe();
-var sessionSync = new SessionSync(sessionBlockDataInPipe, apiKeyDataOutPipe, apiBlockDataOutPipe);
+var sessionSync = new SessionSync(sessionBlockDataInPipe, apiKeyDataOutPipe, apiBlockDataOutPipe, message);
 var sessionSyncThread = new Thread(async() => {
     while(!cancellationTokenSource.Token.IsCancellationRequested) {
         await sessionSync.PushSessionData(cancellationTokenSource.Token);
