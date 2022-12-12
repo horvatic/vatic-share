@@ -23,7 +23,7 @@ namespace MessageBus
         }
 
         public bool HasMessage() {
-            return _messages.TryPeek(out _);
+            return !_messages.IsEmpty;
         }
     }
 }

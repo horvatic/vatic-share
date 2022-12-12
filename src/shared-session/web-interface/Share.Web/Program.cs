@@ -13,13 +13,19 @@ using var apiBlockDataOutPipe = pipeBuilder.BuildWebApiBlockDataOutPipe();
 using var sessionKeyDataInPipe = pipeBuilder.BuildSessionKeyDataInPipe();
 using var apiKeyDataOutPipe = pipeBuilder.BuildWebApiKeyDataOutPipe();
 var sessionSync = new SessionSync(sessionBlockDataInPipe, apiKeyDataOutPipe, apiBlockDataOutPipe, message);
-var sessionSyncThread = new Thread(async() => {
+var fileSessionSyncThread = new Thread(async() => {
     while(!cancellationTokenSource.Token.IsCancellationRequested) {
-        await sessionSync.PushSessionData(cancellationTokenSource.Token);
+        await sessionSync.PushFileSessionData(cancellationTokenSource.Token);
         sessionSync.RemoveClosedUserSession();
     }
 });
-sessionSyncThread.Start();
+var messageSessionSyncThread = new Thread(async() => {
+    while(!cancellationTokenSource.Token.IsCancellationRequested) {
+        await sessionSync.PushMessageSessionData(cancellationTokenSource.Token);
+    }
+});
+fileSessionSyncThread.Start();
+messageSessionSyncThread.Start();
 
 var webSocketOptions = new WebSocketOptions()
 {

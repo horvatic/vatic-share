@@ -47,20 +47,27 @@ namespace UserSession {
             _userSessions.Add(userSession);
         }
 
-        public async Task PushSessionData(CancellationToken cancellationToken) {
+        public async Task PushFileSessionData(CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
-            var rawFilePackage = await _apiOutKeyDataPipe.ReadLineAsync() ?? ""; // CAUSES SYNC
+            var rawFilePackage = await _apiOutKeyDataPipe.ReadLineAsync() ?? "";
             var filePackage = "";
             if(rawFilePackage != "") {
                 filePackage = Encoding.UTF8.GetString(Convert.FromBase64String(rawFilePackage));
             }
+            foreach(var userSession in _userSessions) {
+                if(userSession.User.IsOpen) {
+                    await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
+                }
+            }
+        }
+
+        public async Task PushMessageSessionData(CancellationToken cancellationToken) {
             var messages = new List<string>();
             while(_message.HasMessage()) {
                 messages.Add(_message.Fetch());
             }
             foreach(var userSession in _userSessions) {
                 if(userSession.User.IsOpen) {
-                    await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
                     foreach(var message in messages) {
                         await userSession.User.WriteRequest(message, MESSAGE_OUT);
                     }
