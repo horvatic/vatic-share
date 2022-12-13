@@ -2,6 +2,8 @@
   <div id="session">
     <h2>WebSocket Testing</h2> 
     <textarea v-model="fileResponseMessage" @keydown="onPressFileKey" readonly/>
+  </div>
+  <div>
     <textarea v-model="messageResponseMessage" readonly/>
     <input v-model="messageRequestMessage" @keyup.enter="onPressMessageEnter"/>
   </div>
