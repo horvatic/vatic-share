@@ -3,7 +3,7 @@ using MessageBus;
 
 namespace UserSession {
     public class SessionSync {
-        private readonly List<UserSessionModel> _userSessions;
+        private readonly UserSessionStore _userSessionStore;
         private readonly FileStream _sessionInBlockDataPipe;
         private readonly StreamReader _apiOutKeyDataPipe;
         private readonly StreamReader _apiOutBlockDataPipe;
@@ -17,8 +17,8 @@ namespace UserSession {
 
         private const string MESSAGE_OUT = "message ";
 
-        public SessionSync(FileStream sessionInBlockDataPipe, StreamReader apiOutKeyDataPipe, StreamReader apiOutBlockDataPipe, Message message) {
-            _userSessions = new List<UserSessionModel>();
+        public SessionSync(FileStream sessionInBlockDataPipe, StreamReader apiOutKeyDataPipe, StreamReader apiOutBlockDataPipe, Message message, UserSessionStore userSessionStore) {
+            _userSessionStore = userSessionStore;
             _apiOutKeyDataPipe = apiOutKeyDataPipe;
             _apiOutBlockDataPipe = apiOutBlockDataPipe;
             _sessionInBlockDataPipe = sessionInBlockDataPipe;
@@ -44,7 +44,7 @@ namespace UserSession {
 
             await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
 
-            _userSessions.Add(userSession);
+            _userSessionStore.AddUser(userSession);
         }
 
         public async Task PushFileSessionData(CancellationToken cancellationToken) {
@@ -54,7 +54,7 @@ namespace UserSession {
             if(rawFilePackage != "") {
                 filePackage = Encoding.UTF8.GetString(Convert.FromBase64String(rawFilePackage));
             }
-            foreach(var userSession in _userSessions) {
+            foreach(var userSession in _userSessionStore.GetUserList()) {
                 if(userSession.User.IsOpen) {
                     await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
                 }
@@ -66,7 +66,7 @@ namespace UserSession {
             while(_message.HasMessage()) {
                 messages.Add(_message.Fetch());
             }
-            foreach(var userSession in _userSessions) {
+            foreach(var userSession in _userSessionStore.GetUserList()) {
                 if(userSession.User.IsOpen) {
                     foreach(var message in messages) {
                         await userSession.User.WriteRequest(message, MESSAGE_OUT);
@@ -76,9 +76,9 @@ namespace UserSession {
         }
 
         public void RemoveClosedUserSession() {
-            var closedSessions = _userSessions.Where(x => !x.User.IsOpen).ToList();
+            var closedSessions = _userSessionStore.GetUserList().Where(x => !x.User.IsOpen).ToList();
             foreach(var closedSession in closedSessions) {
-                _userSessions.Remove(closedSession);
+                _userSessionStore.RemoveUser(closedSession);
             }
         }
     }

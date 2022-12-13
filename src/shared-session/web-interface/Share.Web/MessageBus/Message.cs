@@ -14,7 +14,7 @@ namespace MessageBus
                 return message;
             }
             else {
-                return "";
+                throw new Exception("no message");
             }
         }
 
