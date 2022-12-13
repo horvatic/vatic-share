@@ -62,10 +62,14 @@ namespace UserSession {
         }
 
         public async Task PushMessageSessionData(CancellationToken cancellationToken) {
+            if(!_message.HasMessage()) {
+                return;
+            }
+            
             var messages = new List<string>();
             while(_message.HasMessage()) {
                 messages.Add(_message.Fetch());
-            }
+            }       
             foreach(var userSession in _userSessionStore.GetUserList()) {
                 if(userSession.User.IsOpen) {
                     foreach(var message in messages) {
