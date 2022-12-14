@@ -4,9 +4,7 @@ using MessageBus;
 namespace UserSession {
     public class SessionSync {
         private readonly UserSessionStore _userSessionStore;
-        private readonly FileStream _sessionInBlockDataPipe;
         private readonly StreamReader _apiOutKeyDataPipe;
-        private readonly StreamReader _apiOutBlockDataPipe;
 
         private readonly Message _message;
 
@@ -17,33 +15,13 @@ namespace UserSession {
 
         private const string MESSAGE_OUT = "message ";
 
-        public SessionSync(FileStream sessionInBlockDataPipe, StreamReader apiOutKeyDataPipe, StreamReader apiOutBlockDataPipe, Message message, UserSessionStore userSessionStore) {
+        public SessionSync(StreamReader apiOutKeyDataPipe, Message message, UserSessionStore userSessionStore) {
             _userSessionStore = userSessionStore;
             _apiOutKeyDataPipe = apiOutKeyDataPipe;
-            _apiOutBlockDataPipe = apiOutBlockDataPipe;
-            _sessionInBlockDataPipe = sessionInBlockDataPipe;
             _message = message;
         }
 
-        public async Task SyncUserSession(UserSessionModel userSession) {
-            var dataInEncoded = Encoding.UTF8.GetBytes(DATA_IN);
-            var endMessage = Encoding.UTF8.GetBytes("\n");
-            var spaceData = Encoding.UTF8.GetBytes(" ");
-            var readEncoded = Encoding.UTF8.GetBytes(READ);
-            var fileName = Encoding.UTF8.GetBytes("filename");
-
-            await _sessionInBlockDataPipe.WriteAsync(readEncoded, 0, readEncoded.Length);
-            await _sessionInBlockDataPipe.WriteAsync(fileName, 0, fileName.Length);
-            await _sessionInBlockDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
-
-            var rawFilePackage = await _apiOutBlockDataPipe.ReadLineAsync() ?? "";
-            var filePackage = "";
-            if(rawFilePackage != "") {
-                filePackage = Encoding.UTF8.GetString(Convert.FromBase64String(rawFilePackage));
-            }
-
-            await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
-
+        public void SyncUserSession(UserSessionModel userSession) {
             _userSessionStore.AddUser(userSession);
         }
 
@@ -51,11 +29,14 @@ namespace UserSession {
             cancellationToken.ThrowIfCancellationRequested();
             var rawFilePackage = await _apiOutKeyDataPipe.ReadLineAsync() ?? "";
             var filePackage = "";
+            var filePackageName = "";
             if(rawFilePackage != "") {
-                filePackage = Encoding.UTF8.GetString(Convert.FromBase64String(rawFilePackage));
+                var package = rawFilePackage.Split(" ", 2);
+                filePackage = Encoding.UTF8.GetString(Convert.FromBase64String(package[1]));
+                filePackageName = package[0];
             }
             foreach(var userSession in _userSessionStore.GetUserList()) {
-                if(userSession.User.IsOpen) {
+                if(userSession.User.IsOpen && filePackageName == userSession.OpenFile) {
                     await userSession.User.WriteRequest(filePackage, FILE_DATA_OUT);
                 }
             }
