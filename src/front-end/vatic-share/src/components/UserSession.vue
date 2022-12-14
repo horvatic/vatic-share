@@ -1,14 +1,19 @@
 <template>
-  <div id="session">
+  <div id="session" class="container">
     <h2>Vatic Share</h2>
-    <input v-model="currentWorkingFileName" readonly/>
-    <textarea v-model="fileResponseMessage" @keydown="onPressFileKey" readonly/>
-    <input v-model="fileName" @keyup.enter="onPressFileName"/>
+    <div class="d-flex">
+      <div class="p-2 w-100 vh-100 flex-grow-1">
+        <textarea class="w-100 h-75" v-model="fileResponseMessage" @keydown="onPressFileKey" readonly/>
+        <input v-model="currentWorkingFileName" readonly/>
+        <input v-model="fileName" @keyup.enter="onPressFileName"/>
+      </div>
+      <div class="p-2 vh-100 flex-shrink-1">
+        <textarea class="w-100 h-75" v-model="messageResponseMessage" readonly/>
+        <input v-model="messageRequestMessage" @keyup.enter="onPressMessageEnter"/>
+      </div>
+    </div>
   </div>
-  <div>
-    <textarea v-model="messageResponseMessage" readonly/>
-    <input v-model="messageRequestMessage" @keyup.enter="onPressMessageEnter"/>
-  </div>
+
 </template>
 
 <script>
@@ -25,7 +30,6 @@ export default {
           this.fileResponseMessage = this.fileResponseMessage.slice(0, -1) + fileMessage + '|'
         }
       } else if (event.data.startsWith("message ")) {
-        console.log(event.data)
         let messageData = event.data.slice(8)
         this.messageResponseMessage = this.messageResponseMessage + messageData + '\n'
       }
@@ -73,8 +77,4 @@ export default {
 </script>
 
 <style>
-  textarea {
-    width: 1250px;
-    height: 550px;
-  }
 </style>
