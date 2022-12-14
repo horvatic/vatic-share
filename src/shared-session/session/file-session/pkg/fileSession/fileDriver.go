@@ -29,11 +29,11 @@ func RunDriver() {
 				} else {
 					fileStore[sessionMessage[0]] = fileStore[sessionMessage[0]] + string(decode)
 				}
-				sessionInPipe.WriteString(sharedConstants.OutputKeyDataFromFileCommand + sessionMessage[1] + "\n")
+				sessionInPipe.WriteString(sharedConstants.OutputKeyDataFromFileCommand + sessionMessage[0] + " " + sessionMessage[1] + "\n")
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
 				filename := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
 				encode := b64.StdEncoding.EncodeToString([]byte(fileStore[filename]))
-				sessionInPipe.WriteString(sharedConstants.OutputBlockDataFromFileCommand + encode + "\n")
+				sessionInPipe.WriteString(sharedConstants.OutputBlockDataFromFileCommand + filename + " " + encode + "\n")
 			} else {
 				sessionInPipe.WriteString("Unknown command\n")
 			}

@@ -1,7 +1,9 @@
 <template>
   <div id="session">
-    <h2>WebSocket Testing</h2> 
+    <h2>Vatic Share</h2>
+    <input v-model="currentWorkingFileName" readonly/>
     <textarea v-model="fileResponseMessage" @keydown="onPressFileKey" readonly/>
+    <input v-model="fileName" @keyup.enter="onPressFileName"/>
   </div>
   <div>
     <textarea v-model="messageResponseMessage" readonly/>
@@ -38,8 +40,10 @@ export default {
     return {
       connection: null,
       fileResponseMessage: '',
+      fileName: '',
       messageResponseMessage: '',
-      messageRequestMessage: ''
+      messageRequestMessage: '',
+      currentWorkingFileName: 'No File Selected'
     }
   },
   methods: {
@@ -57,6 +61,12 @@ export default {
     onPressMessageEnter() {
       this.connection.send("message " + this.messageRequestMessage)
       this.messageRequestMessage = ''
+    },
+    onPressFileName() {
+      this.fileResponseMessage = '' + '|'
+      this.currentWorkingFileName = this.fileName
+      this.connection.send("filename " + this.fileName)
+      this.fileName = ''
     }
   }
 }
