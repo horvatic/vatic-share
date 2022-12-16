@@ -14,7 +14,8 @@ using var apiBlockDataOutPipe = pipeBuilder.BuildWebApiBlockDataOutPipe();
 using var sessionKeyDataInPipe = pipeBuilder.BuildSessionKeyDataInPipe();
 using var apiKeyDataOutPipe = pipeBuilder.BuildWebApiKeyDataOutPipe();
 using var sessionCommandInPipe = pipeBuilder.BuildSessionCommandInPipe();
-var sessionSync = new SessionSync(apiKeyDataOutPipe, message, userSessionStore);
+using var webApiCommandDataOutPipe = pipeBuilder.BuildWebApiCommandDataOutPipe();
+var sessionSync = new SessionSync(apiKeyDataOutPipe, webApiCommandDataOutPipe, message, userSessionStore);
 var fileSessionSyncThread = new Thread(async() => {
     while(!cancellationTokenSource.Token.IsCancellationRequested) {
         await sessionSync.PushFileSessionData(cancellationTokenSource.Token);
@@ -26,6 +27,13 @@ var messageSessionSyncThread = new Thread(async() => {
         await sessionSync.PushMessageSessionData(cancellationTokenSource.Token);
     }
 });
+var commandSessionSyncThread = new Thread(async() => {
+    while(!cancellationTokenSource.Token.IsCancellationRequested) {
+        await sessionSync.PushCommandSessionData(cancellationTokenSource.Token);
+    }
+});
+
+commandSessionSyncThread.Start();
 fileSessionSyncThread.Start();
 messageSessionSyncThread.Start();
 

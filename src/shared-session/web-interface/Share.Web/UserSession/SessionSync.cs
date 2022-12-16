@@ -5,6 +5,7 @@ namespace UserSession {
     public class SessionSync {
         private readonly UserSessionStore _userSessionStore;
         private readonly StreamReader _apiOutKeyDataPipe;
+        private readonly StreamReader _apiOutCommandDataPipe;
 
         private readonly Message _message;
 
@@ -15,14 +16,34 @@ namespace UserSession {
 
         private const string MESSAGE_OUT = "message ";
 
-        public SessionSync(StreamReader apiOutKeyDataPipe, Message message, UserSessionStore userSessionStore) {
+        private const string COMMAND_OUT = "commanddata ";
+
+        public SessionSync(StreamReader apiOutKeyDataPipe, StreamReader apiOutCommandDataPipe, Message message, UserSessionStore userSessionStore) {
             _userSessionStore = userSessionStore;
             _apiOutKeyDataPipe = apiOutKeyDataPipe;
+            _apiOutCommandDataPipe = apiOutCommandDataPipe;
             _message = message;
         }
 
         public void SyncUserSession(UserSessionModel userSession) {
             _userSessionStore.AddUser(userSession);
+        }
+
+        public async Task PushCommandSessionData(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+            var rawCommandPackage = await _apiOutCommandDataPipe.ReadLineAsync() ?? "";
+            var commandPackage = "";
+            var sessionId = "";
+            if(rawCommandPackage != "") {
+                var package = rawCommandPackage.Split(" ", 2);
+                commandPackage = Encoding.UTF8.GetString(Convert.FromBase64String(package[1]));
+                sessionId = package[0];
+            }
+            foreach(var userSession in _userSessionStore.GetUserList()) {
+                if(userSession.User.IsOpen && sessionId == userSession.SessionId) {
+                    await userSession.User.WriteRequest(commandPackage, COMMAND_OUT);
+                }
+            }
         }
 
         public async Task PushFileSessionData(CancellationToken cancellationToken) {

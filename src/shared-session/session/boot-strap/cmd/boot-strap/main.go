@@ -18,6 +18,8 @@ func main() {
 	makePipe(sharedConstants.WebApiBlockDataInFileData)
 	makePipe(sharedConstants.SessionInCommandData)
 	makePipe(sharedConstants.CommandInCommandData)
+	makePipe(sharedConstants.SessionInReadCommandData)
+	makePipe(sharedConstants.WebApiInCommandData)
 
 	webApi := exec.Command("./Share.Web")
 	webApi.Stdout = os.Stdout

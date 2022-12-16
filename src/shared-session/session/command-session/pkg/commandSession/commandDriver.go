@@ -1,8 +1,6 @@
 package commandSession
 
 import (
-	"fmt"
-
 	b64 "encoding/base64"
 	"os/exec"
 	"strings"
@@ -12,10 +10,11 @@ import (
 
 func RunDriver() {
 
+	commandInPipe := BuildCommandInPipe()
 	commandOutPipe := BuildCommandOutPipe()
 
 	for {
-		rawLine, err := commandOutPipe.ReadBytes('\n')
+		rawLine, err := commandInPipe.ReadBytes('\n')
 		line := string(rawLine)
 		if err == nil {
 			if strings.HasPrefix(line, sharedConstants.TriggerCommandCommand) {
@@ -26,7 +25,7 @@ func RunDriver() {
 				userCommand := exec.Command(string(decode))
 				output, _ := userCommand.CombinedOutput()
 
-				fmt.Println(string(output))
+				commandOutPipe.WriteString(sessionMessage[0] + " " + b64.StdEncoding.EncodeToString(output) + "\n")
 			}
 		}
 	}

@@ -3,6 +3,8 @@ package sharedConstants
 //Pipe Command Process
 const SessionInCommandData = "/tmp/sessionInCommandData"
 const CommandInCommandData = "/tmp/commandInCommandData"
+const SessionInReadCommandData = "/tmp/sessionInReadCommandData"
+const WebApiInCommandData = "/tmp/webApiInCommandData"
 
 // Pipes File Process
 const FileInFileData = "/tmp/fileInFileData"

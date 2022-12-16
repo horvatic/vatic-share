@@ -10,7 +10,22 @@ func RunSession() {
 	go runDataFileSession()
 	go runKeyDataSession()
 	go runCommandDataSession()
+	go runCommandResultsSession()
 	runBlockDataSession()
+}
+
+func runCommandResultsSession() {
+	sessionComamndDataIn := BuildInPipe(sharedConstants.SessionInReadCommandData)
+	webApiOut := BuildOutPipe(sharedConstants.WebApiInCommandData)
+
+	for {
+		rawLine, err := sessionComamndDataIn.ReadBytes('\n')
+		if err == nil {
+			line := string(rawLine)
+			webApiOut.WriteString(strings.TrimSuffix(line, "\n") +  "\n")
+		}
+	}
+
 }
 
 func runCommandDataSession() {

@@ -40,6 +40,8 @@ export default {
       } else if (event.data.startsWith("message ")) {
         let messageData = event.data.slice(8)
         this.messageResponseMessage = this.messageResponseMessage + messageData + '\n'
+      } else if (event.data.startsWith("commanddata ")) {
+        this.commandResponseMessage = event.data.slice(12)
       }
     }
     this.connection.onopen = (event) => {
