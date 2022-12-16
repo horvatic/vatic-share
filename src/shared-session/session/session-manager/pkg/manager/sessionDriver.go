@@ -1,6 +1,8 @@
 package manager
 
 import (
+	"fmt"
+
 	"strings"
 
 	"github.com/horvatic/vatic-share/sharedConstants"
@@ -9,8 +11,25 @@ import (
 func RunSession() {
 	go runDataFileSession()
 	go runKeyDataSession()
+	go runCommandDataSession()
 	runBlockDataSession()
 }
+
+func runCommandDataSession() {
+	sessionCommandDataOutFromWebApiPipe := BuildSessionCommandDataOutFromWebApiPipe()
+
+	for {
+		rawLine, err := sessionCommandDataOutFromWebApiPipe.ReadBytes('\n')
+		if err == nil {
+			line := string(rawLine)
+			if strings.HasPrefix(line, sharedConstants.CommandDataInCommand) {
+				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.CommandDataInCommand), "\n")
+				fmt.Println(message)
+			}
+		}
+	}
+}
+
 
 func runBlockDataSession() {
 	sessionBlockDataOutFromWebApiPipe := BuildSessionBlockDataOutFromWebApiPipe()

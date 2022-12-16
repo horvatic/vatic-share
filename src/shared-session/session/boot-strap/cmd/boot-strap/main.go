@@ -16,6 +16,7 @@ func main() {
 	os.Remove(sharedConstants.WebApiKeyDataInPipeName)
 	os.Remove(sharedConstants.SessionBlockDataInPipeNameForWebApi)
 	os.Remove(sharedConstants.WebApiBlockDataInPipeName)
+	os.Remove(sharedConstants.SessionInPipeForWebApiCommandData)
 
 	_ = unix.Mkfifo(sharedConstants.FileInPipeName, 0666)
 	_ = unix.Mkfifo(sharedConstants.SessionInPipeNameForFileRead, 0666)
@@ -23,6 +24,7 @@ func main() {
 	_ = unix.Mkfifo(sharedConstants.WebApiKeyDataInPipeName, 0666)
 	_ = unix.Mkfifo(sharedConstants.SessionBlockDataInPipeNameForWebApi, 0666)
 	_ = unix.Mkfifo(sharedConstants.WebApiBlockDataInPipeName, 0666)
+	_ = unix.Mkfifo(sharedConstants.SessionInPipeForWebApiCommandData, 0666)
 
 	webApi := exec.Command("./Share.Web")
 	webApi.Stdout = os.Stdout
