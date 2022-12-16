@@ -13,7 +13,9 @@ using var sessionBlockDataInPipe = pipeBuilder.BuildSessionBlockDataInPipe();
 using var apiBlockDataOutPipe = pipeBuilder.BuildWebApiBlockDataOutPipe();
 using var sessionKeyDataInPipe = pipeBuilder.BuildSessionKeyDataInPipe();
 using var apiKeyDataOutPipe = pipeBuilder.BuildWebApiKeyDataOutPipe();
-var sessionSync = new SessionSync(apiKeyDataOutPipe, message, userSessionStore);
+using var sessionCommandInPipe = pipeBuilder.BuildSessionCommandInPipe();
+using var webApiCommandDataOutPipe = pipeBuilder.BuildWebApiCommandDataOutPipe();
+var sessionSync = new SessionSync(apiKeyDataOutPipe, webApiCommandDataOutPipe, message, userSessionStore);
 var fileSessionSyncThread = new Thread(async() => {
     while(!cancellationTokenSource.Token.IsCancellationRequested) {
         await sessionSync.PushFileSessionData(cancellationTokenSource.Token);
@@ -25,6 +27,13 @@ var messageSessionSyncThread = new Thread(async() => {
         await sessionSync.PushMessageSessionData(cancellationTokenSource.Token);
     }
 });
+var commandSessionSyncThread = new Thread(async() => {
+    while(!cancellationTokenSource.Token.IsCancellationRequested) {
+        await sessionSync.PushCommandSessionData(cancellationTokenSource.Token);
+    }
+});
+
+commandSessionSyncThread.Start();
 fileSessionSyncThread.Start();
 messageSessionSyncThread.Start();
 
@@ -40,7 +49,7 @@ app.Use(async (HttpContext context, Func<Task> next) =>
     {
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
         var userSession = new UserSessionModel(new User(webSocket, 1024 * 4), Guid.NewGuid().ToString());
-        var session = new Session(userSession, sessionBlockDataInPipe, sessionKeyDataInPipe, apiBlockDataOutPipe, message);
+        var session = new Session(userSession, sessionBlockDataInPipe, sessionKeyDataInPipe, apiBlockDataOutPipe, sessionCommandInPipe, message);
         sessionSync.SyncUserSession(userSession);
         await session.Run();
     }

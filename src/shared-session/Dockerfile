@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y apt-transport-https libicu-dev
 WORKDIR /app
 COPY --from=go-builder /build/session/session-manager/build/bin/session-manager .
 COPY --from=go-builder /build/session/file-session/build/bin/file-session .
+COPY --from=go-builder /build/session/command-session/build/bin/command-session .
 COPY --from=go-builder /build/session/boot-strap/build/bin/boot-strap .
 COPY --from=dotnet-builder /build/web-interface/build/bin/Share.Web .
 COPY --from=dotnet-builder /build/web-interface/build/bin/appsettings.json .

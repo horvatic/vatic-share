@@ -9,12 +9,45 @@ import (
 func RunSession() {
 	go runDataFileSession()
 	go runKeyDataSession()
+	go runCommandDataSession()
+	go runCommandResultsSession()
 	runBlockDataSession()
 }
 
+func runCommandResultsSession() {
+	sessionComamndDataIn := BuildInPipe(sharedConstants.SessionInReadCommandData)
+	webApiOut := BuildOutPipe(sharedConstants.WebApiInCommandData)
+
+	for {
+		rawLine, err := sessionComamndDataIn.ReadBytes('\n')
+		if err == nil {
+			line := string(rawLine)
+			webApiOut.WriteString(strings.TrimSuffix(line, "\n") +  "\n")
+		}
+	}
+
+}
+
+func runCommandDataSession() {
+	sessionCommandDataOutFromWebApiPipe := BuildInPipe(sharedConstants.SessionInCommandData)
+	commandInPipe := BuildOutPipe(sharedConstants.CommandInCommandData)
+
+	for {
+		rawLine, err := sessionCommandDataOutFromWebApiPipe.ReadBytes('\n')
+		if err == nil {
+			line := string(rawLine)
+			if strings.HasPrefix(line, sharedConstants.CommandDataInCommand) {
+				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.CommandDataInCommand), "\n")
+				commandInPipe.WriteString(sharedConstants.TriggerCommandCommand + message +  "\n")
+			}
+		}
+	}
+}
+
+
 func runBlockDataSession() {
-	sessionBlockDataOutFromWebApiPipe := BuildSessionBlockDataOutFromWebApiPipe()
-	fileInPipe := BuildFileInPipe()
+	sessionBlockDataOutFromWebApiPipe := BuildInPipe(sharedConstants.SessionBlockDataInFileData)
+	fileInPipe := BuildOutPipe(sharedConstants.FileInFileData)
 
 	for {
 		rawLine, err := sessionBlockDataOutFromWebApiPipe.ReadBytes('\n')
@@ -31,8 +64,8 @@ func runBlockDataSession() {
 }
 
 func runKeyDataSession() {
-	sessionKeyDataOutFromWebApiPipe := BuildSessionKeyDataOutFromWebApiPipe()
-	fileInPipe := BuildFileInPipe()
+	sessionKeyDataOutFromWebApiPipe := BuildInPipe(sharedConstants.SessionKeyDataInFileData)
+	fileInPipe := BuildOutPipe(sharedConstants.FileInFileData)
 
 	for {
 		rawLine, err := sessionKeyDataOutFromWebApiPipe.ReadBytes('\n')
@@ -49,9 +82,9 @@ func runKeyDataSession() {
 }
 
 func runDataFileSession() {
-	webApiBlockDataPipe := BuildWebApiBlockDataInPipe()
-	webApiKeyDataPipe := BuildWebApiKeyDataInPipe()
-	sessionOutFromFileReadPipe := BuildSessionOutFromFileReadPipe()
+	webApiBlockDataPipe := BuildOutPipe(sharedConstants.WebApiBlockDataInFileData)
+	webApiKeyDataPipe := BuildOutPipe(sharedConstants.WebApiKeyDataInFileData)
+	sessionOutFromFileReadPipe := BuildInPipe(sharedConstants.SessionInFileRead)
 
 	for {
 		rawLine, err := sessionOutFromFileReadPipe.ReadBytes('\n')

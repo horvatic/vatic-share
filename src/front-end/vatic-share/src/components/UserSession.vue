@@ -8,8 +8,16 @@
         <input v-model="fileName" @keyup.enter="onPressFileName"/>
       </div>
       <div class="p-2 vh-100 flex-shrink-1">
-        <textarea class="w-100 h-75" v-model="messageResponseMessage" readonly/>
-        <input v-model="messageRequestMessage" @keyup.enter="onPressMessageEnter"/>
+        <div class="d-flex vh-100 flex-column">
+          <div class="p-2 h-100">
+            <textarea class="w-100 h-75" v-model="messageResponseMessage" readonly/>
+            <input v-model="messageRequestMessage" @keyup.enter="onPressMessageEnter"/>
+          </div>
+          <div class="p-2 h-100">
+            <textarea class="w-100 h-50" v-model="commandResponseMessage" readonly/>
+            <input v-model="commandRequestMessage" @keyup.enter="onPressCommandEnter"/>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -32,6 +40,8 @@ export default {
       } else if (event.data.startsWith("message ")) {
         let messageData = event.data.slice(8)
         this.messageResponseMessage = this.messageResponseMessage + messageData + '\n'
+      } else if (event.data.startsWith("commanddata ")) {
+        this.commandResponseMessage = event.data.slice(12)
       }
     }
     this.connection.onopen = (event) => {
@@ -47,7 +57,9 @@ export default {
       fileName: '',
       messageResponseMessage: '',
       messageRequestMessage: '',
-      currentWorkingFileName: 'No File Selected'
+      currentWorkingFileName: 'No File Selected',
+      commandResponseMessage: '',
+      commandRequestMessage: ''
     }
   },
   methods: {
@@ -71,10 +83,10 @@ export default {
       this.currentWorkingFileName = this.fileName
       this.connection.send("filename " + this.fileName)
       this.fileName = ''
+    }, onPressCommandEnter() {
+      this.connection.send("command " + this.commandRequestMessage)
+      this.commandRequestMessage = '';
     }
   }
 }
 </script>
-
-<style>
-</style>

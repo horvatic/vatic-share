@@ -8,6 +8,7 @@ namespace UserSession {
         private readonly FileStream _sessionInKeyDataPipe;
         private readonly FileStream _sessionInBlockDataPipe;
         private readonly StreamReader _apiOutBlockDataPipe;
+        private readonly FileStream _sessionInCommandDataPipe;
 
         private readonly Message _message;
 
@@ -20,13 +21,16 @@ namespace UserSession {
         private const string FILE_NAME_IN = "filename";
         private const string FILE_DATA_OUT = "filedata ";
         private const string READ = "read ";
+        private const string CMD_IN = "command";
+         private const string CMD_OUT = "commanddata ";
 
-        public Session(UserSessionModel userSession, FileStream sessionInBlockDataPipe, FileStream sessionInKeyDataPipe, StreamReader apiOutBlockDataPipe, Message message) {
+        public Session(UserSessionModel userSession, FileStream sessionInBlockDataPipe, FileStream sessionInKeyDataPipe, StreamReader apiOutBlockDataPipe, FileStream sessionInCommandDataPipe, Message message) {
             _userSession = userSession;
             _sessionInKeyDataPipe = sessionInKeyDataPipe;
             _message = message;
             _sessionInBlockDataPipe = sessionInBlockDataPipe;
             _apiOutBlockDataPipe = apiOutBlockDataPipe;
+            _sessionInCommandDataPipe = sessionInCommandDataPipe;
         }
 
         public async Task Run() {
@@ -42,11 +46,30 @@ namespace UserSession {
                     _userSession.SetOpenFile(request);
                     await SyncFile();
                     
+                } else if( command == CMD_IN ) {
+                    await SendCommand(request);
                 }
             }
             await _userSession.User.Close();
         }
 
+        private async Task SendCommand(string request) {
+            var dataInEncoded = Encoding.UTF8.GetBytes(CMD_OUT);
+            var sessionId = Encoding.UTF8.GetBytes(_userSession.SessionId);
+            var endMessage = Encoding.UTF8.GetBytes("\n");
+            var spaceData = Encoding.UTF8.GetBytes(" ");
+
+            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
+            var requestPackage = new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
+            if(requestPackage.Array == null) {
+                return;
+            }
+            await _sessionInCommandDataPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
+            await _sessionInCommandDataPipe.WriteAsync(sessionId, 0, sessionId.Length);
+            await _sessionInCommandDataPipe.WriteAsync(spaceData, 0, spaceData.Length);
+            await _sessionInCommandDataPipe.WriteAsync(requestPackage.Array, 0, requestPackage.Count);
+            await _sessionInCommandDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
+        }
         private async Task WriteToFile(string request) {
             if(_userSession.OpenFile == null) {
                 return;
