@@ -2,18 +2,18 @@ namespace Pipes {
     public class PipeBuilder {
 
         // Command
-        private const string SessionCommandInPipeName = "/tmp/sessionInPipeForWebApiCommandData";
+        private const string SessionInCommandData = "/tmp/sessionInCommandData";
         private const string WebApiCommandDataOutPipeName = "/tmp/webApiCommandDataOutPipeName";
 
         // File
-        private const string SessionKeyDataInPipeName = "/tmp/sessionInPipeForWebApiKeyData";
-        private const string WebApiKeyDataOutPipeName = "/tmp/webApiInPipeKeyData";
+        private const string SessionKeyDataInFileData = "/tmp/sessionKeyDataInFileData";
+         private const string WebApiKeyDataInFileData = "/tmp/webApiKeyDataInFileData";
         private const string SessionBlockDataInPipeName = "/tmp/sessionInPipeForWebApiBlockData";
-        private const string WebApiBlockDataOutPipeName = "/tmp/webApiInPipeBlockData";
+         private const string WebApiBlockDataInFileData = "/tmp/webApiBlockDataInFileData";
 
         // Command
         public FileStream BuildSessionCommandInPipe() {
-            return File.OpenWrite(SessionCommandInPipeName);
+            return File.OpenWrite(SessionInCommandData);
         }
 
         public StreamReader BuildWebApiCommandDataOutPipe() {
@@ -26,15 +26,15 @@ namespace Pipes {
         }
 
         public StreamReader BuildWebApiBlockDataOutPipe() {
-            return new StreamReader(File.OpenRead(WebApiBlockDataOutPipeName));
+            return new StreamReader(File.OpenRead(WebApiBlockDataInFileData));
         }
 
         public FileStream BuildSessionKeyDataInPipe() {
-            return File.OpenWrite(SessionKeyDataInPipeName);
+            return File.OpenWrite(SessionKeyDataInFileData);
         }
 
         public StreamReader BuildWebApiKeyDataOutPipe() {
-            return new StreamReader(File.OpenRead(WebApiKeyDataOutPipeName));
+            return new StreamReader(File.OpenRead(WebApiKeyDataInFileData));
         }
     }
 }

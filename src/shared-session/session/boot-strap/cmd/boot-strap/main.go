@@ -10,21 +10,14 @@ import (
 
 func main() {
 
-	os.Remove(sharedConstants.FileInPipeName)
-	os.Remove(sharedConstants.SessionInPipeNameForFileRead)
-	os.Remove(sharedConstants.SessionKeyDataInPipeNameForWebApi)
-	os.Remove(sharedConstants.WebApiKeyDataInPipeName)
-	os.Remove(sharedConstants.SessionBlockDataInPipeNameForWebApi)
-	os.Remove(sharedConstants.WebApiBlockDataInPipeName)
-	os.Remove(sharedConstants.SessionInPipeForWebApiCommandData)
-
-	_ = unix.Mkfifo(sharedConstants.FileInPipeName, 0666)
-	_ = unix.Mkfifo(sharedConstants.SessionInPipeNameForFileRead, 0666)
-	_ = unix.Mkfifo(sharedConstants.SessionKeyDataInPipeNameForWebApi, 0666)
-	_ = unix.Mkfifo(sharedConstants.WebApiKeyDataInPipeName, 0666)
-	_ = unix.Mkfifo(sharedConstants.SessionBlockDataInPipeNameForWebApi, 0666)
-	_ = unix.Mkfifo(sharedConstants.WebApiBlockDataInPipeName, 0666)
-	_ = unix.Mkfifo(sharedConstants.SessionInPipeForWebApiCommandData, 0666)
+	makePipe(sharedConstants.FileInFileData)
+	makePipe(sharedConstants.SessionInFileRead)
+	makePipe(sharedConstants.SessionKeyDataInFileData)
+	makePipe(sharedConstants.WebApiKeyDataInFileData)
+	makePipe(sharedConstants.SessionBlockDataInFileData)
+	makePipe(sharedConstants.WebApiBlockDataInFileData)
+	makePipe(sharedConstants.SessionInCommandData)
+	makePipe(sharedConstants.CommandInCommandData)
 
 	webApi := exec.Command("./Share.Web")
 	webApi.Stdout = os.Stdout
@@ -35,10 +28,19 @@ func main() {
 	fileSession := exec.Command("./file-session")
 	fileSession.Stdout = os.Stdout
 	fileSession.Stderr = os.Stderr
+	commandSession := exec.Command("./command-session")
+	commandSession.Stdout = os.Stdout
+	commandSession.Stderr = os.Stderr
 
 	sessionManager.Start()
 	fileSession.Start()
 	webApi.Start()
+	commandSession.Start()
 
 	webApi.Wait()
+}
+
+func makePipe(name string) {
+	os.Remove(name)
+	_ = unix.Mkfifo(name, 0666)
 }

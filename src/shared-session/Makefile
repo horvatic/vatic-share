@@ -7,6 +7,7 @@ all: build-session build-web
 build-session: clean-session
 	cd session/session-manager && go mod tidy && go build -o build/bin/session-manager cmd/session-manager/main.go
 	cd session/file-session && go mod tidy && go build -o build/bin/file-session cmd/file-session/main.go
+	cd session/command-session && go mod tidy && go build -o build/bin/command-session cmd/command-session/main.go
 	cd session/boot-strap && go mod tidy && go build -o build/bin/boot-strap cmd/boot-strap/main.go
 
 .PHONY: build-web
@@ -19,6 +20,7 @@ build-web: clean-web
 clean-session:
 	rm -rf session/session-manager/build/bin
 	rm -rf session/file-session/build/bin
+	rm -rf session/command-session/build/bin
 	rm -rf session/boot-strap/build/bin
 
 .PHONY: clean-web
@@ -33,5 +35,6 @@ clean-web:
 go-fmt:
 	cd session/session-manager && go fmt ./...
 	cd session/file-session && go fmt ./...
+	cd session/command-session && go fmt ./...
 	cd session/boot-strap && go fmt ./...
 	cd session/shared-constants && go fmt ./...

@@ -1,8 +1,6 @@
 package manager
 
 import (
-	"fmt"
-
 	"strings"
 
 	"github.com/horvatic/vatic-share/sharedConstants"
@@ -16,7 +14,8 @@ func RunSession() {
 }
 
 func runCommandDataSession() {
-	sessionCommandDataOutFromWebApiPipe := BuildSessionCommandDataOutFromWebApiPipe()
+	sessionCommandDataOutFromWebApiPipe := BuildInPipe(sharedConstants.SessionInCommandData)
+	commandInPipe := BuildOutPipe(sharedConstants.CommandInCommandData)
 
 	for {
 		rawLine, err := sessionCommandDataOutFromWebApiPipe.ReadBytes('\n')
@@ -24,7 +23,7 @@ func runCommandDataSession() {
 			line := string(rawLine)
 			if strings.HasPrefix(line, sharedConstants.CommandDataInCommand) {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.CommandDataInCommand), "\n")
-				fmt.Println(message)
+				commandInPipe.WriteString(sharedConstants.TriggerCommandCommand + message +  "\n")
 			}
 		}
 	}
@@ -32,8 +31,8 @@ func runCommandDataSession() {
 
 
 func runBlockDataSession() {
-	sessionBlockDataOutFromWebApiPipe := BuildSessionBlockDataOutFromWebApiPipe()
-	fileInPipe := BuildFileInPipe()
+	sessionBlockDataOutFromWebApiPipe := BuildInPipe(sharedConstants.SessionBlockDataInFileData)
+	fileInPipe := BuildOutPipe(sharedConstants.FileInFileData)
 
 	for {
 		rawLine, err := sessionBlockDataOutFromWebApiPipe.ReadBytes('\n')
@@ -50,8 +49,8 @@ func runBlockDataSession() {
 }
 
 func runKeyDataSession() {
-	sessionKeyDataOutFromWebApiPipe := BuildSessionKeyDataOutFromWebApiPipe()
-	fileInPipe := BuildFileInPipe()
+	sessionKeyDataOutFromWebApiPipe := BuildInPipe(sharedConstants.SessionKeyDataInFileData)
+	fileInPipe := BuildOutPipe(sharedConstants.FileInFileData)
 
 	for {
 		rawLine, err := sessionKeyDataOutFromWebApiPipe.ReadBytes('\n')
@@ -68,9 +67,9 @@ func runKeyDataSession() {
 }
 
 func runDataFileSession() {
-	webApiBlockDataPipe := BuildWebApiBlockDataInPipe()
-	webApiKeyDataPipe := BuildWebApiKeyDataInPipe()
-	sessionOutFromFileReadPipe := BuildSessionOutFromFileReadPipe()
+	webApiBlockDataPipe := BuildOutPipe(sharedConstants.WebApiBlockDataInFileData)
+	webApiKeyDataPipe := BuildOutPipe(sharedConstants.WebApiKeyDataInFileData)
+	sessionOutFromFileReadPipe := BuildInPipe(sharedConstants.SessionInFileRead)
 
 	for {
 		rawLine, err := sessionOutFromFileReadPipe.ReadBytes('\n')
