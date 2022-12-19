@@ -5,7 +5,6 @@ using UserSession;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-var pipeBuilder = new PipeBuilder();
 var cancellationTokenSource = new CancellationTokenSource();
 var message = new Message();
 var userSessionStore = new UserSessionStore();
@@ -14,7 +13,7 @@ using var apiBlockDataOutPipe = new ApiBlockDataOutPipe();
 using var sessionKeyDataInPipe = new SessionKeyDataInPipe();
 using var apiKeyDataOutPipe = new ApiKeyDataOutPipe();
 using var sessionCommandInPipe = new SessionCommandInPipe();
-using var webApiCommandDataOutPipe = pipeBuilder.BuildWebApiCommandDataOutPipe();
+using var webApiCommandDataOutPipe = new WebApiCommandDataOutPipe();
 var sessionSync = new SessionSync(apiKeyDataOutPipe, webApiCommandDataOutPipe, message, userSessionStore);
 var fileSessionSyncThread = new Thread(async() => {
     while(!cancellationTokenSource.Token.IsCancellationRequested) {

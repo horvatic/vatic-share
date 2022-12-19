@@ -6,7 +6,7 @@ namespace UserSession {
     public class SessionSync {
         private readonly UserSessionStore _userSessionStore;
         private readonly IApiKeyDataOutPipe _apiOutKeyDataPipe;
-        private readonly StreamReader _apiOutCommandDataPipe;
+        private readonly IWebApiCommandDataOutPipe _apiOutCommandDataPipe;
 
         private readonly Message _message;
 
@@ -19,7 +19,7 @@ namespace UserSession {
 
         private const string COMMAND_OUT = "commanddata ";
 
-        public SessionSync(IApiKeyDataOutPipe apiOutKeyDataPipe, StreamReader apiOutCommandDataPipe, Message message, UserSessionStore userSessionStore) {
+        public SessionSync(IApiKeyDataOutPipe apiOutKeyDataPipe, IWebApiCommandDataOutPipe apiOutCommandDataPipe, Message message, UserSessionStore userSessionStore) {
             _userSessionStore = userSessionStore;
             _apiOutKeyDataPipe = apiOutKeyDataPipe;
             _apiOutCommandDataPipe = apiOutCommandDataPipe;
@@ -32,7 +32,7 @@ namespace UserSession {
 
         public async Task PushCommandSessionData(CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
-            var rawCommandPackage = await _apiOutCommandDataPipe.ReadLineAsync() ?? "";
+            var rawCommandPackage = await _apiOutCommandDataPipe.ReadAsync() ?? "";
             var commandPackage = "";
             var sessionId = "";
             if(rawCommandPackage != "") {
