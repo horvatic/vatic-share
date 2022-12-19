@@ -23,7 +23,6 @@ namespace UserSession {
         private const string FILE_DATA_OUT = "filedata ";
         private const string READ = "read ";
         private const string CMD_IN = "command";
-         private const string CMD_OUT = "commanddata ";
 
         public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, ISessionKeyDataInPipe sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, ISessionCommandInPipe sessionInCommandDataPipe, Message message) {
             _userSession = userSession;
@@ -56,7 +55,7 @@ namespace UserSession {
 
         private async Task SendCommand(string request) {
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
-            await _sessionInCommandDataPipe.SendAsync(CMD_OUT + _userSession.SessionId + " " + base64);
+            await _sessionInCommandDataPipe.SendAsync(_userSession.SessionId, base64);
         }
         
         private async Task WriteToFile(string request) {

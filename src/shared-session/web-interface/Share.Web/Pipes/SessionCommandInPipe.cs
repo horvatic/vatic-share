@@ -4,15 +4,16 @@ namespace Pipes {
     public class SessionCommandInPipe : InPipe, ISessionCommandInPipe
     {
         private const string SessionInCommandData = "/tmp/sessionInCommandData";
+        private const string CMD_OUT = "commanddata ";
         private const string END_MESSAGE = "\n";
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1);
         public SessionCommandInPipe() : base(SessionInCommandData)
         {
         }
 
-        public async Task SendAsync(string message)
+        public async Task SendAsync(string sessionId, string message)
         {
-            var package = Encoding.UTF8.GetBytes(message + END_MESSAGE);
+            var package = Encoding.UTF8.GetBytes(CMD_OUT + sessionId + " " + message + END_MESSAGE);
 
             await semaphore.WaitAsync();
             try {
