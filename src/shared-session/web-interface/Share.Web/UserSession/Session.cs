@@ -1,13 +1,14 @@
 using System.Text;
 using MessageBus;
+using Pipes;
 
 namespace UserSession {
 
     public class Session {
         private readonly UserSessionModel _userSession;
         private readonly FileStream _sessionInKeyDataPipe;
-        private readonly FileStream _sessionInBlockDataPipe;
-        private readonly StreamReader _apiOutBlockDataPipe;
+        private readonly ISessionBlockDataInPipe _sessionInBlockDataPipe;
+        private readonly IApiBlockDataOutPipe _apiOutBlockDataPipe;
         private readonly FileStream _sessionInCommandDataPipe;
 
         private readonly Message _message;
@@ -24,7 +25,7 @@ namespace UserSession {
         private const string CMD_IN = "command";
          private const string CMD_OUT = "commanddata ";
 
-        public Session(UserSessionModel userSession, FileStream sessionInBlockDataPipe, FileStream sessionInKeyDataPipe, StreamReader apiOutBlockDataPipe, FileStream sessionInCommandDataPipe, Message message) {
+        public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, FileStream sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, FileStream sessionInCommandDataPipe, Message message) {
             _userSession = userSession;
             _sessionInKeyDataPipe = sessionInKeyDataPipe;
             _message = message;
@@ -97,17 +98,9 @@ namespace UserSession {
                 return;
             }
 
-            var dataInEncoded = Encoding.UTF8.GetBytes(DATA_IN);
-            var endMessage = Encoding.UTF8.GetBytes("\n");
-            var spaceData = Encoding.UTF8.GetBytes(" ");
-            var readEncoded = Encoding.UTF8.GetBytes(READ);
-            var fileName = Encoding.UTF8.GetBytes(_userSession.OpenFile);
+            await _sessionInBlockDataPipe.SendAsync(READ + _userSession.OpenFile);
 
-            await _sessionInBlockDataPipe.WriteAsync(readEncoded, 0, readEncoded.Length);
-            await _sessionInBlockDataPipe.WriteAsync(fileName, 0, fileName.Length);
-            await _sessionInBlockDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
-
-            var rawFilePackage = await _apiOutBlockDataPipe.ReadLineAsync() ?? "";
+            var rawFilePackage = await _apiOutBlockDataPipe.ReadAsync() ?? "";
             var filePackage = "";
             var filePackageName = "";
             if(rawFilePackage != "") {

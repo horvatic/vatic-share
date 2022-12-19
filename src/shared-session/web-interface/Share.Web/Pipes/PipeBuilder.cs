@@ -8,8 +8,6 @@ namespace Pipes {
         // File
         private const string SessionKeyDataInFileData = "/tmp/sessionKeyDataInFileData";
          private const string WebApiKeyDataInFileData = "/tmp/webApiKeyDataInFileData";
-        private const string SessionBlockDataInPipeName = "/tmp/sessionInPipeForWebApiBlockData";
-        private const string WebApiBlockDataInFileData = "/tmp/webApiBlockDataInFileData";
 
         // Command
         public FileStream BuildSessionCommandInPipe() {
@@ -20,14 +18,6 @@ namespace Pipes {
             return new StreamReader(File.OpenRead(WebApiCommandDataOutPipeName));
         }
 
-        // File
-        public FileStream BuildSessionBlockDataInPipe() {
-            return File.OpenWrite(SessionBlockDataInPipeName);
-        }
-
-        public StreamReader BuildWebApiBlockDataOutPipe() {
-            return new StreamReader(File.OpenRead(WebApiBlockDataInFileData));
-        }
 
         public FileStream BuildSessionKeyDataInPipe() {
             return File.OpenWrite(SessionKeyDataInFileData);
