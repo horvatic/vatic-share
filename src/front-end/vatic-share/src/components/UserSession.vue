@@ -6,6 +6,7 @@
         <textarea class="w-100 h-75" v-model="fileResponseMessage" @keydown="onPressFileKey" readonly/>
         <input v-model="currentWorkingFileName" readonly/>
         <input v-model="fileName" @keyup.enter="onPressFileName"/>
+        <button @click="saveFile">Save</button>
       </div>
       <div class="p-2 vh-100 flex-shrink-1">
         <div class="d-flex vh-100 flex-column">
@@ -86,6 +87,9 @@ export default {
     }, onPressCommandEnter() {
       this.connection.send("command " + this.commandRequestMessage)
       this.commandRequestMessage = '';
+    },
+    saveFile() {
+      this.connection.send("save " + this.fileName)
     }
   }
 }

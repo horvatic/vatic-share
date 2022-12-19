@@ -1,6 +1,7 @@
 namespace Pipes
 {
     public interface ISessionBlockDataInPipe {
-        Task SendAsync(string message);
+        Task SendReadAsync(string fileName);
+        Task SendSaveAsync(string fileName);
     }
 }

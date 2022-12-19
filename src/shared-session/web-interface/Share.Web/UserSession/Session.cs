@@ -21,6 +21,7 @@ namespace UserSession {
 
         private const string FILE_NAME_IN = "filename";
         private const string FILE_DATA_OUT = "filedata ";
+        private const string FILE_SAVE = "save";
         
         private const string CMD_IN = "command";
 
@@ -48,9 +49,18 @@ namespace UserSession {
                     
                 } else if( command == CMD_IN ) {
                     await SendCommand(request);
+                } else if ( command == FILE_SAVE ) {
+                    await SaveFile();
                 }
             }
             await _userSession.User.Close();
+        }
+
+        private async Task SaveFile() {
+            if(_userSession.OpenFile == null) {
+                return;
+            }
+            await _sessionInBlockDataPipe.SendSaveAsync(_userSession.OpenFile);
         }
 
         private async Task SendCommand(string request) {
@@ -72,7 +82,7 @@ namespace UserSession {
                 return;
             }
 
-            await _sessionInBlockDataPipe.SendAsync(_userSession.OpenFile);
+            await _sessionInBlockDataPipe.SendReadAsync(_userSession.OpenFile);
 
             var rawFilePackage = await _apiOutBlockDataPipe.ReadAsync() ?? "";
             var filePackage = "";

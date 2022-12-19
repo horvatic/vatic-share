@@ -1,9 +1,8 @@
 package manager
 
 import (
-	"strings"
-
 	"github.com/horvatic/vatic-share/sharedConstants"
+	"strings"
 )
 
 func RunSession() {
@@ -22,7 +21,7 @@ func runCommandResultsSession() {
 		rawLine, err := sessionComamndDataIn.ReadBytes('\n')
 		if err == nil {
 			line := string(rawLine)
-			webApiOut.WriteString(strings.TrimSuffix(line, "\n") +  "\n")
+			webApiOut.WriteString(strings.TrimSuffix(line, "\n") + "\n")
 		}
 	}
 
@@ -38,12 +37,11 @@ func runCommandDataSession() {
 			line := string(rawLine)
 			if strings.HasPrefix(line, sharedConstants.CommandDataInCommand) {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.CommandDataInCommand), "\n")
-				commandInPipe.WriteString(sharedConstants.TriggerCommandCommand + message +  "\n")
+				commandInPipe.WriteString(sharedConstants.TriggerCommandCommand + message + "\n")
 			}
 		}
 	}
 }
-
 
 func runBlockDataSession() {
 	sessionBlockDataOutFromWebApiPipe := BuildInPipe(sharedConstants.SessionBlockDataInFileData)
@@ -58,6 +56,9 @@ func runBlockDataSession() {
 			} else if strings.HasPrefix(line, sharedConstants.ReadFromFileCommand) {
 				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.ReadFromFileCommand), "\n")
 				fileInPipe.WriteString(sharedConstants.ReadFromFileCommand + message + "\n")
+			} else if strings.HasPrefix(line, sharedConstants.SaveFileCommand) {
+				message := strings.TrimSuffix(strings.TrimPrefix(line, sharedConstants.SaveFileCommand), "\n")
+				fileInPipe.WriteString(sharedConstants.SaveFileCommand + message + "\n")
 			}
 		}
 	}
