@@ -1,10 +1,11 @@
 using System.Text;
 using MessageBus;
+using Pipes;
 
 namespace UserSession {
     public class SessionSync {
         private readonly UserSessionStore _userSessionStore;
-        private readonly StreamReader _apiOutKeyDataPipe;
+        private readonly IApiKeyDataOutPipe _apiOutKeyDataPipe;
         private readonly StreamReader _apiOutCommandDataPipe;
 
         private readonly Message _message;
@@ -18,7 +19,7 @@ namespace UserSession {
 
         private const string COMMAND_OUT = "commanddata ";
 
-        public SessionSync(StreamReader apiOutKeyDataPipe, StreamReader apiOutCommandDataPipe, Message message, UserSessionStore userSessionStore) {
+        public SessionSync(IApiKeyDataOutPipe apiOutKeyDataPipe, StreamReader apiOutCommandDataPipe, Message message, UserSessionStore userSessionStore) {
             _userSessionStore = userSessionStore;
             _apiOutKeyDataPipe = apiOutKeyDataPipe;
             _apiOutCommandDataPipe = apiOutCommandDataPipe;
@@ -48,7 +49,7 @@ namespace UserSession {
 
         public async Task PushFileSessionData(CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
-            var rawFilePackage = await _apiOutKeyDataPipe.ReadLineAsync() ?? "";
+            var rawFilePackage = await _apiOutKeyDataPipe.ReadAsync() ?? "";
             var filePackage = "";
             var filePackageName = "";
             if(rawFilePackage != "") {
