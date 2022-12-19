@@ -1,18 +1,19 @@
 using System.Text;
 using MessageBus;
+using Pipes;
 
 namespace UserSession {
 
     public class Session {
         private readonly UserSessionModel _userSession;
-        private readonly FileStream _sessionInKeyDataPipe;
-        private readonly FileStream _sessionInBlockDataPipe;
-        private readonly StreamReader _apiOutBlockDataPipe;
-        private readonly FileStream _sessionInCommandDataPipe;
+        private readonly ISessionKeyDataInPipe _sessionInKeyDataPipe;
+        private readonly ISessionBlockDataInPipe _sessionInBlockDataPipe;
+        private readonly IApiBlockDataOutPipe _apiOutBlockDataPipe;
+        private readonly ISessionCommandInPipe _sessionInCommandDataPipe;
 
         private readonly Message _message;
 
-        private const string DATA_IN = "datain ";
+        
 
         private const string FILE_KEY_IN = "filekey";
 
@@ -20,11 +21,10 @@ namespace UserSession {
 
         private const string FILE_NAME_IN = "filename";
         private const string FILE_DATA_OUT = "filedata ";
-        private const string READ = "read ";
+        
         private const string CMD_IN = "command";
-         private const string CMD_OUT = "commanddata ";
 
-        public Session(UserSessionModel userSession, FileStream sessionInBlockDataPipe, FileStream sessionInKeyDataPipe, StreamReader apiOutBlockDataPipe, FileStream sessionInCommandDataPipe, Message message) {
+        public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, ISessionKeyDataInPipe sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, ISessionCommandInPipe sessionInCommandDataPipe, Message message) {
             _userSession = userSession;
             _sessionInKeyDataPipe = sessionInKeyDataPipe;
             _message = message;
@@ -54,42 +54,17 @@ namespace UserSession {
         }
 
         private async Task SendCommand(string request) {
-            var dataInEncoded = Encoding.UTF8.GetBytes(CMD_OUT);
-            var sessionId = Encoding.UTF8.GetBytes(_userSession.SessionId);
-            var endMessage = Encoding.UTF8.GetBytes("\n");
-            var spaceData = Encoding.UTF8.GetBytes(" ");
-
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
-            var requestPackage = new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
-            if(requestPackage.Array == null) {
-                return;
-            }
-            await _sessionInCommandDataPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
-            await _sessionInCommandDataPipe.WriteAsync(sessionId, 0, sessionId.Length);
-            await _sessionInCommandDataPipe.WriteAsync(spaceData, 0, spaceData.Length);
-            await _sessionInCommandDataPipe.WriteAsync(requestPackage.Array, 0, requestPackage.Count);
-            await _sessionInCommandDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
+            await _sessionInCommandDataPipe.SendAsync(_userSession.SessionId, base64);
         }
+        
         private async Task WriteToFile(string request) {
             if(_userSession.OpenFile == null) {
                 return;
             }
-            var keyInOffSet = FILE_KEY_IN.Length;
-            var dataInEncoded = Encoding.UTF8.GetBytes(DATA_IN);
-            var fileName = Encoding.UTF8.GetBytes(_userSession.OpenFile);
-            var endMessage = Encoding.UTF8.GetBytes("\n");
-            var spaceData = Encoding.UTF8.GetBytes(" ");
-
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
-            var requestPackage = new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
-            if(requestPackage.Array == null) {
-                return;
-            }
-            await _sessionInKeyDataPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
-            await _sessionInKeyDataPipe.WriteAsync(fileName, 0, fileName.Length);
-            await _sessionInKeyDataPipe.WriteAsync(spaceData, 0, spaceData.Length);
-            await _sessionInKeyDataPipe.WriteAsync(requestPackage.Array, 0, requestPackage.Count);
-            await _sessionInKeyDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
+
+            await _sessionInKeyDataPipe.SendAsync(_userSession.OpenFile, base64);
         }
 
         private async Task SyncFile() {
@@ -97,17 +72,9 @@ namespace UserSession {
                 return;
             }
 
-            var dataInEncoded = Encoding.UTF8.GetBytes(DATA_IN);
-            var endMessage = Encoding.UTF8.GetBytes("\n");
-            var spaceData = Encoding.UTF8.GetBytes(" ");
-            var readEncoded = Encoding.UTF8.GetBytes(READ);
-            var fileName = Encoding.UTF8.GetBytes(_userSession.OpenFile);
+            await _sessionInBlockDataPipe.SendAsync(_userSession.OpenFile);
 
-            await _sessionInBlockDataPipe.WriteAsync(readEncoded, 0, readEncoded.Length);
-            await _sessionInBlockDataPipe.WriteAsync(fileName, 0, fileName.Length);
-            await _sessionInBlockDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
-
-            var rawFilePackage = await _apiOutBlockDataPipe.ReadLineAsync() ?? "";
+            var rawFilePackage = await _apiOutBlockDataPipe.ReadAsync() ?? "";
             var filePackage = "";
             var filePackageName = "";
             if(rawFilePackage != "") {

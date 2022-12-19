@@ -1,24 +1,21 @@
 using System.Text;
 using MessageBus;
+using Pipes;
 
 namespace UserSession {
     public class SessionSync {
         private readonly UserSessionStore _userSessionStore;
-        private readonly StreamReader _apiOutKeyDataPipe;
-        private readonly StreamReader _apiOutCommandDataPipe;
+        private readonly IApiKeyDataOutPipe _apiOutKeyDataPipe;
+        private readonly IWebApiCommandDataOutPipe _apiOutCommandDataPipe;
 
         private readonly Message _message;
-
-        private const string DATA_IN = "datain ";
-
-        private const string READ = "read ";
         private const string FILE_DATA_OUT = "filedata ";
 
         private const string MESSAGE_OUT = "message ";
 
         private const string COMMAND_OUT = "commanddata ";
 
-        public SessionSync(StreamReader apiOutKeyDataPipe, StreamReader apiOutCommandDataPipe, Message message, UserSessionStore userSessionStore) {
+        public SessionSync(IApiKeyDataOutPipe apiOutKeyDataPipe, IWebApiCommandDataOutPipe apiOutCommandDataPipe, Message message, UserSessionStore userSessionStore) {
             _userSessionStore = userSessionStore;
             _apiOutKeyDataPipe = apiOutKeyDataPipe;
             _apiOutCommandDataPipe = apiOutCommandDataPipe;
@@ -31,7 +28,7 @@ namespace UserSession {
 
         public async Task PushCommandSessionData(CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
-            var rawCommandPackage = await _apiOutCommandDataPipe.ReadLineAsync() ?? "";
+            var rawCommandPackage = await _apiOutCommandDataPipe.ReadAsync() ?? "";
             var commandPackage = "";
             var sessionId = "";
             if(rawCommandPackage != "") {
@@ -48,7 +45,7 @@ namespace UserSession {
 
         public async Task PushFileSessionData(CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
-            var rawFilePackage = await _apiOutKeyDataPipe.ReadLineAsync() ?? "";
+            var rawFilePackage = await _apiOutKeyDataPipe.ReadAsync() ?? "";
             var filePackage = "";
             var filePackageName = "";
             if(rawFilePackage != "") {
