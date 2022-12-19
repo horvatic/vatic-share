@@ -1,6 +1,6 @@
 package sharedConstants
 
-//Pipe Command Process
+// Pipe Command Process
 const SessionInCommandData = "/tmp/sessionInCommandData"
 const CommandInCommandData = "/tmp/commandInCommandData"
 const SessionInReadCommandData = "/tmp/sessionInReadCommandData"
@@ -22,5 +22,6 @@ const CommandDataInCommand = "commanddata "
 const WriteToFileCommand = "writefile "
 const TriggerCommandCommand = "triggercommand "
 const ReadFromFileCommand = "read "
+const SaveFileCommand = "save "
 const OutputBlockDataFromFileCommand = "blockoutput "
 const OutputKeyDataFromFileCommand = "keyoutput "

@@ -8,7 +8,7 @@ import (
 	"github.com/horvatic/vatic-share/sharedConstants"
 )
 
-const contextRoot = "/work" 
+const contextRoot = "/work"
 
 func RunDriver() {
 
