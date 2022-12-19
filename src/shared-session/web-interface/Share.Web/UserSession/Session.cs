@@ -6,7 +6,7 @@ namespace UserSession {
 
     public class Session {
         private readonly UserSessionModel _userSession;
-        private readonly FileStream _sessionInKeyDataPipe;
+        private readonly ISessionKeyDataInPipe _sessionInKeyDataPipe;
         private readonly ISessionBlockDataInPipe _sessionInBlockDataPipe;
         private readonly IApiBlockDataOutPipe _apiOutBlockDataPipe;
         private readonly FileStream _sessionInCommandDataPipe;
@@ -25,7 +25,7 @@ namespace UserSession {
         private const string CMD_IN = "command";
          private const string CMD_OUT = "commanddata ";
 
-        public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, FileStream sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, FileStream sessionInCommandDataPipe, Message message) {
+        public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, ISessionKeyDataInPipe sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, FileStream sessionInCommandDataPipe, Message message) {
             _userSession = userSession;
             _sessionInKeyDataPipe = sessionInKeyDataPipe;
             _message = message;
@@ -75,22 +75,9 @@ namespace UserSession {
             if(_userSession.OpenFile == null) {
                 return;
             }
-            var keyInOffSet = FILE_KEY_IN.Length;
-            var dataInEncoded = Encoding.UTF8.GetBytes(DATA_IN);
-            var fileName = Encoding.UTF8.GetBytes(_userSession.OpenFile);
-            var endMessage = Encoding.UTF8.GetBytes("\n");
-            var spaceData = Encoding.UTF8.GetBytes(" ");
-
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
-            var requestPackage = new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
-            if(requestPackage.Array == null) {
-                return;
-            }
-            await _sessionInKeyDataPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
-            await _sessionInKeyDataPipe.WriteAsync(fileName, 0, fileName.Length);
-            await _sessionInKeyDataPipe.WriteAsync(spaceData, 0, spaceData.Length);
-            await _sessionInKeyDataPipe.WriteAsync(requestPackage.Array, 0, requestPackage.Count);
-            await _sessionInKeyDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
+
+            await _sessionInKeyDataPipe.SendAsync(DATA_IN + _userSession.OpenFile + " " + base64);
         }
 
         private async Task SyncFile() {
