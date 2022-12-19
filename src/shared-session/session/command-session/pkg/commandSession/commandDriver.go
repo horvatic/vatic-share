@@ -8,6 +8,8 @@ import (
 	"github.com/horvatic/vatic-share/sharedConstants"
 )
 
+const contextRoot = "/work" 
+
 func RunDriver() {
 
 	commandInPipe := BuildCommandInPipe()
@@ -25,10 +27,12 @@ func RunDriver() {
 
 				if len(cmd) == 1 {
 					userCommand := exec.Command(cmd[0])
+					userCommand.Dir = contextRoot
 					output, _ := userCommand.CombinedOutput()
 					commandOutPipe.WriteString(sessionMessage[0] + " " + b64.StdEncoding.EncodeToString(output) + "\n")
 				} else {
 					userCommand := exec.Command(cmd[0], cmd[1:]...)
+					userCommand.Dir = contextRoot
 					output, _ := userCommand.CombinedOutput()
 					commandOutPipe.WriteString(sessionMessage[0] + " " + b64.StdEncoding.EncodeToString(output) + "\n")
 				}

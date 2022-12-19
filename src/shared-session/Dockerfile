@@ -16,6 +16,7 @@ RUN make build-web
 FROM --platform=linux/amd64 ubuntu:latest as final
 ENV ASPNETCORE_hostBuilder__reloadConfigOnChange=false
 RUN apt-get update && apt-get install -y apt-transport-https libicu-dev
+RUN mkdir work
 WORKDIR /app
 COPY --from=go-builder /build/session/session-manager/build/bin/session-manager .
 COPY --from=go-builder /build/session/file-session/build/bin/file-session .
