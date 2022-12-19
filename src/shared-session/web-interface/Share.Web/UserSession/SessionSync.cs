@@ -9,10 +9,6 @@ namespace UserSession {
         private readonly IWebApiCommandDataOutPipe _apiOutCommandDataPipe;
 
         private readonly Message _message;
-
-        private const string DATA_IN = "datain ";
-
-        private const string READ = "read ";
         private const string FILE_DATA_OUT = "filedata ";
 
         private const string MESSAGE_OUT = "message ";

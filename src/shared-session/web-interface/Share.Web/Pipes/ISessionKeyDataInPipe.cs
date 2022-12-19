@@ -1,5 +1,5 @@
 namespace Pipes {
     public interface ISessionKeyDataInPipe {
-        Task SendAsync(string message);
+        Task SendAsync(string openFile, string message);
     }
 }

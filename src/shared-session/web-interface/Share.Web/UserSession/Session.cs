@@ -13,7 +13,7 @@ namespace UserSession {
 
         private readonly Message _message;
 
-        private const string DATA_IN = "datain ";
+        
 
         private const string FILE_KEY_IN = "filekey";
 
@@ -21,7 +21,7 @@ namespace UserSession {
 
         private const string FILE_NAME_IN = "filename";
         private const string FILE_DATA_OUT = "filedata ";
-        private const string READ = "read ";
+        
         private const string CMD_IN = "command";
 
         public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, ISessionKeyDataInPipe sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, ISessionCommandInPipe sessionInCommandDataPipe, Message message) {
@@ -64,7 +64,7 @@ namespace UserSession {
             }
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
 
-            await _sessionInKeyDataPipe.SendAsync(DATA_IN + _userSession.OpenFile + " " + base64);
+            await _sessionInKeyDataPipe.SendAsync(_userSession.OpenFile, base64);
         }
 
         private async Task SyncFile() {
@@ -72,7 +72,7 @@ namespace UserSession {
                 return;
             }
 
-            await _sessionInBlockDataPipe.SendAsync(READ + _userSession.OpenFile);
+            await _sessionInBlockDataPipe.SendAsync(_userSession.OpenFile);
 
             var rawFilePackage = await _apiOutBlockDataPipe.ReadAsync() ?? "";
             var filePackage = "";

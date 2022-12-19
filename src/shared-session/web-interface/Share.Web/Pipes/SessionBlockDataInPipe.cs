@@ -5,6 +5,7 @@ namespace Pipes {
     {
         private const string SessionBlockDataInPipeName = "/tmp/sessionInPipeForWebApiBlockData";
         private const string END_MESSAGE = "\n";
+        private const string READ = "read ";
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1);
 
         public SessionBlockDataInPipe() : base(SessionBlockDataInPipeName)
@@ -13,7 +14,7 @@ namespace Pipes {
 
         public async Task SendAsync(string message)
         {
-            var package = Encoding.UTF8.GetBytes(message + END_MESSAGE);
+            var package = Encoding.UTF8.GetBytes(READ + message + END_MESSAGE);
 
             await semaphore.WaitAsync();
             try {

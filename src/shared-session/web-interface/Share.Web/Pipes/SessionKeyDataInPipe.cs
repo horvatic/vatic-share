@@ -5,15 +5,16 @@ namespace Pipes {
     {
         private const string SessionKeyDataInFileData = "/tmp/sessionKeyDataInFileData";
         private const string END_MESSAGE = "\n";
+        private const string DATA_IN = "datain ";
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1);
 
         public SessionKeyDataInPipe() : base(SessionKeyDataInFileData)
         {
         }
 
-        public async Task SendAsync(string message)
+        public async Task SendAsync(string openFile, string message)
         {
-            var package = Encoding.UTF8.GetBytes(message + END_MESSAGE);
+            var package = Encoding.UTF8.GetBytes(DATA_IN + openFile + " " + message + END_MESSAGE);
 
             await semaphore.WaitAsync();
             try {
