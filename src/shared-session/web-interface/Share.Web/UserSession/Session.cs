@@ -9,7 +9,7 @@ namespace UserSession {
         private readonly ISessionKeyDataInPipe _sessionInKeyDataPipe;
         private readonly ISessionBlockDataInPipe _sessionInBlockDataPipe;
         private readonly IApiBlockDataOutPipe _apiOutBlockDataPipe;
-        private readonly FileStream _sessionInCommandDataPipe;
+        private readonly ISessionCommandInPipe _sessionInCommandDataPipe;
 
         private readonly Message _message;
 
@@ -25,7 +25,7 @@ namespace UserSession {
         private const string CMD_IN = "command";
          private const string CMD_OUT = "commanddata ";
 
-        public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, ISessionKeyDataInPipe sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, FileStream sessionInCommandDataPipe, Message message) {
+        public Session(UserSessionModel userSession, ISessionBlockDataInPipe sessionInBlockDataPipe, ISessionKeyDataInPipe sessionInKeyDataPipe, IApiBlockDataOutPipe apiOutBlockDataPipe, ISessionCommandInPipe sessionInCommandDataPipe, Message message) {
             _userSession = userSession;
             _sessionInKeyDataPipe = sessionInKeyDataPipe;
             _message = message;
@@ -55,22 +55,10 @@ namespace UserSession {
         }
 
         private async Task SendCommand(string request) {
-            var dataInEncoded = Encoding.UTF8.GetBytes(CMD_OUT);
-            var sessionId = Encoding.UTF8.GetBytes(_userSession.SessionId);
-            var endMessage = Encoding.UTF8.GetBytes("\n");
-            var spaceData = Encoding.UTF8.GetBytes(" ");
-
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(request));
-            var requestPackage = new ArraySegment<byte>(Encoding.UTF8.GetBytes(base64), 0, base64.Length);
-            if(requestPackage.Array == null) {
-                return;
-            }
-            await _sessionInCommandDataPipe.WriteAsync(dataInEncoded, 0, dataInEncoded.Length);
-            await _sessionInCommandDataPipe.WriteAsync(sessionId, 0, sessionId.Length);
-            await _sessionInCommandDataPipe.WriteAsync(spaceData, 0, spaceData.Length);
-            await _sessionInCommandDataPipe.WriteAsync(requestPackage.Array, 0, requestPackage.Count);
-            await _sessionInCommandDataPipe.WriteAsync(endMessage, 0, endMessage.Length);
+            await _sessionInCommandDataPipe.SendAsync(CMD_OUT + _userSession.SessionId + " " + base64);
         }
+        
         private async Task WriteToFile(string request) {
             if(_userSession.OpenFile == null) {
                 return;

@@ -13,7 +13,7 @@ using var sessionBlockDataInPipe = new SessionBlockDataInPipe();
 using var apiBlockDataOutPipe = new ApiBlockDataOutPipe();
 using var sessionKeyDataInPipe = new SessionKeyDataInPipe();
 using var apiKeyDataOutPipe = new ApiKeyDataOutPipe();
-using var sessionCommandInPipe = pipeBuilder.BuildSessionCommandInPipe();
+using var sessionCommandInPipe = new SessionCommandInPipe();
 using var webApiCommandDataOutPipe = pipeBuilder.BuildWebApiCommandDataOutPipe();
 var sessionSync = new SessionSync(apiKeyDataOutPipe, webApiCommandDataOutPipe, message, userSessionStore);
 var fileSessionSyncThread = new Thread(async() => {
